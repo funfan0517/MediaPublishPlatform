@@ -510,6 +510,7 @@ import { ElMessage } from 'element-plus'
 import { useAccountStore } from '@/stores/account'
 import { useAppStore } from '@/stores/app'
 import { materialApi } from '@/api/material'
+import { publishApi } from '@/api/publish'
 
 // API base URL
 const apiBaseUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5409'
@@ -600,7 +601,8 @@ const availableAccounts = computed(() => {
     3: '抖音',
     2: '视频号',
     1: '小红书',
-    4: '快手'
+    4: '快手',
+    5: 'TikTok'
   }
   const currentPlatform = currentTab.value ? platformMap[currentTab.value.selectedPlatform] : null
   return currentPlatform ? accountStore.accounts.filter(acc => acc.platform === currentPlatform) : []
@@ -843,16 +845,8 @@ const confirmPublish = async (tab) => {
     }
 
     // 调用后端发布API
-    fetch(`${apiBaseUrl}/postVideo`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        ...authHeaders.value
-      },
-      body: JSON.stringify(publishData)
-    })
-    .then(response => response.json())
-    .then(data => {
+    publishApi.postVideo(publishData)
+      .then(data => {
       if (data.code === 200) {
         tab.publishStatus = {
           message: '发布成功',

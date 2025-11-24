@@ -1,0 +1,24 @@
+import { http } from '@/utils/request'
+
+// 视频发布相关API
+export const publishApi = {
+  // 发布视频
+  postVideo(data) {
+    return http.post('/postVideo', data)
+  },
+
+  // 取消发布任务
+  cancelPublishTask(taskId) {
+    return http.get(`/cancelTask?id=${taskId}`)
+  },
+
+  // 获取发布任务状态
+  getPublishTaskStatus(taskId) {
+    return http.get(`/taskStatus?id=${taskId}`)
+  },
+
+  // 获取平台特定参数配置
+  getPlatformConfig(platformType) {
+    return http.get(`/platformConfig?type=${platformType}`)
+  }
+}

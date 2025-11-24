@@ -1019,7 +1019,8 @@ const submitAccountForm = () => {
             '快手': 1,
             '抖音': 2,
             '视频号': 3,
-            '小红书': 4
+            '小红书': 4,
+            'TikTok': 5
           };
           const type = platformTypeMap[accountForm.platform] || 1;
 
