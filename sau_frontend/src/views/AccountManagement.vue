@@ -30,7 +30,7 @@
               <el-table :data="filteredAccounts" style="width: 100%">
                 <el-table-column label="头像" width="80">
                   <template #default="scope">
-                    <el-avatar :src="getDefaultAvatar(scope.row.name)" :size="40" />
+                    <el-avatar :src="getDefaultAvatar(scope.row.name, scope.row.platform)" :size="40" />
                   </template>
                 </el-table-column>
                 <el-table-column prop="name" label="名称" width="180" />
@@ -100,7 +100,7 @@
               <el-table :data="filteredKuaishouAccounts" style="width: 100%">
                 <el-table-column label="头像" width="80">
                   <template #default="scope">
-                    <el-avatar :src="getDefaultAvatar(scope.row.name)" :size="40" />
+                    <el-avatar :src="getDefaultAvatar(scope.row.name, scope.row.platform)" :size="40" />
                   </template>
                 </el-table-column>
                 <el-table-column prop="name" label="名称" width="180" />
@@ -170,7 +170,7 @@
               <el-table :data="filteredDouyinAccounts" style="width: 100%">
                 <el-table-column label="头像" width="80">
                   <template #default="scope">
-                    <el-avatar :src="getDefaultAvatar(scope.row.name)" :size="40" />
+                    <el-avatar :src="getDefaultAvatar(scope.row.name, scope.row.platform)" :size="40" />
                   </template>
                 </el-table-column>
                 <el-table-column prop="name" label="名称" width="180" />
@@ -240,7 +240,7 @@
               <el-table :data="filteredChannelsAccounts" style="width: 100%">
                 <el-table-column label="头像" width="80">
                   <template #default="scope">
-                    <el-avatar :src="getDefaultAvatar(scope.row.name)" :size="40" />
+                    <el-avatar :src="getDefaultAvatar(scope.row.name, scope.row.platform)" :size="40" />
                   </template>
                 </el-table-column>
                 <el-table-column prop="name" label="名称" width="180" />
@@ -310,7 +310,7 @@
               <el-table :data="filteredXiaohongshuAccounts" style="width: 100%">
                 <el-table-column label="头像" width="80">
                   <template #default="scope">
-                    <el-avatar :src="getDefaultAvatar(scope.row.name)" :size="40" />
+                    <el-avatar :src="getDefaultAvatar(scope.row.name, scope.row.platform)" :size="40" />
                   </template>
                 </el-table-column>
                 <el-table-column prop="name" label="名称" width="180" />
@@ -380,7 +380,7 @@
               <el-table :data="filteredTiktokAccounts" style="width: 100%">
                 <el-table-column label="头像" width="80">
                   <template #default="scope">
-                    <el-avatar :src="getDefaultAvatar(scope.row.name)" :size="40" />
+                    <el-avatar :src="getDefaultAvatar(scope.row.name, scope.row.platform)" :size="40" />
                   </template>
                 </el-table-column>
                 <el-table-column prop="name" label="名称" width="180" />
@@ -841,10 +841,52 @@ const handleReLogin = (row) => {
   }, 300)
 }
 
+// 导入平台头像图片
+import kuaishouIcon from '@/assets/kuaishou.jpg';
+import douyinIcon from '@/assets/douyin.jpg';
+import xiaohongshuIcon from '@/assets/xiaohongshu.jpg';
+import shipinhaoIcon from '@/assets/shipinhao.jpg';
+import tiktokIcon from '@/assets/tiktok.jpg';
+
 // 获取默认头像
-const getDefaultAvatar = (name) => {
-  // 使用简单的默认头像，可以基于用户名生成不同的颜色
-  return `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=random`
+const getDefaultAvatar = (name, platform) => {
+  // 使用导入的图片对象，这在Vite项目中更可靠
+  const platformIcons = {
+    '快手': kuaishouIcon,
+    'kuaishou': kuaishouIcon,
+    '抖音': douyinIcon,
+    'douyin': douyinIcon,
+    '小红书': xiaohongshuIcon,
+    'xiaohongshu': xiaohongshuIcon,
+    '视频号': shipinhaoIcon,
+    'shipinhao': shipinhaoIcon,
+    'TikTok': tiktokIcon,
+    'tiktok': tiktokIcon
+  };
+  
+  console.log('当前平台:', platform, '类型:', typeof platform);
+  
+  // 尝试直接匹配
+  if (platform && platformIcons[platform]) {
+    console.log('匹配到平台头像:', platform);
+    return platformIcons[platform];
+  }
+  
+  // 尝试小写匹配
+  if (platform) {
+    const normalized = platform.trim().toLowerCase();
+    if (platformIcons[normalized]) {
+      console.log('小写匹配到平台头像:', normalized);
+      return platformIcons[normalized];
+    }
+  }
+  
+  console.log('未匹配到平台头像，使用默认头像');
+  // 如果没有匹配的平台，返回快手头像作为默认
+  return kuaishouIcon;
+  
+  // 可选：如果需要，仍然可以回退到原始API
+  // return `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=random`;
 }
 
 // SSE事件源对象
