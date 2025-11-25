@@ -237,20 +237,52 @@ async def getValidAccounts():
         print("\n📋 当前数据表内容：")
         for row in rows:
             print(row)
-        for row in rows_list:
-            # 对所有平台类型统一调用check_cookie函数
-            # 包括TikTok(类型5)，check_cookie函数已支持
+        # 定义并发限制数量
+        CONCURRENCY_LIMIT = 5  # 可以根据系统资源调整
+        
+        # 使用并发方式验证cookie
+        async def check_and_update_cookie(row):
             flag = await check_cookie(row[1], row[2])
-            
             if not flag:
                 row[4] = 0
-                cursor.execute('''
-                UPDATE user_info 
-                SET status = ? 
-                WHERE id = ?
-                ''', (0,row[0]))
-                conn.commit()
-                print("✅ 用户状态已更新")
+                # 注意：这里不执行数据库更新，而是返回需要更新的行ID
+                return row[0]
+            return None
+        
+        # 分批处理以控制并发数量
+        def chunked_list(lst, chunk_size):
+            for i in range(0, len(lst), chunk_size):
+                yield lst[i:i + chunk_size]
+        
+        print(f"\n🔄 开始并发验证账号状态（并发数: {CONCURRENCY_LIMIT}）...")
+        
+        # 记录需要更新的账号ID
+        ids_to_update = []
+        
+        # 分批处理所有账号
+        for batch in chunked_list(rows_list, CONCURRENCY_LIMIT):
+            # 为当前批次中的每个账号创建验证任务
+            tasks = [check_and_update_cookie(row) for row in batch]
+            # 并发执行当前批次的所有任务
+            results = await asyncio.gather(*tasks)
+            # 收集需要更新的账号ID
+            for account_id in results:
+                if account_id is not None:
+                    ids_to_update.append(account_id)
+        
+        # 批量更新数据库，减少数据库操作次数
+        if ids_to_update:
+            # 使用批量更新语句
+            placeholders = ','.join(['?' for _ in ids_to_update])
+            cursor.execute(f'''
+            UPDATE user_info 
+            SET status = 0 
+            WHERE id IN ({placeholders})
+            ''', ids_to_update)
+            conn.commit()
+            print(f"✅ 已批量更新 {len(ids_to_update)} 个失效账号的状态")
+        else:
+            print("✅ 所有账号状态均有效，无需更新")
         for row in rows:
             print(row)
         return jsonify(
