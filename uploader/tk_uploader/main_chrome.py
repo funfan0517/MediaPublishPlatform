@@ -152,7 +152,8 @@ class TiktokVideo(object):
         # context = await set_init_script(context)
         page = await context.new_page()
 
-        # change language to eng first （第一次需要改语言，方便用英文查找控件。后面就不需要改了，注释掉可以提高效率）
+        #第一次运行需要打开这段注释，后面就不需要了，注释掉可以提高效率
+        # change language to eng first （改语言方便用英文查找控件）
         # await self.change_language(page)
         # 打印日志
         tiktok_logger.info(f"[+]Changing language to english.")
@@ -163,6 +164,7 @@ class TiktokVideo(object):
         # 打印日志
         tiktok_logger.info(f"[+]Waiting for upload page to load.")
 
+        #第一次运行需要打开这段注释，后面就不需要了，注释掉可以提高效率
         #try:
         #    await page.wait_for_selector('iframe[data-tt="Upload_index_iframe"], div.upload-container', timeout=30000)
         #    tiktok_logger.info("Either iframe or div appeared.")
