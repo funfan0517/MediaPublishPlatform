@@ -156,11 +156,11 @@ class TiktokVideo(object):
         # change language to eng first （改语言方便用英文查找控件）
         # await self.change_language(page)
         # 打印日志
-        tiktok_logger.info(f"[+]Changing language to english.")
+        # tiktok_logger.info(f"[+]Changing language to english.")
         await page.goto("https://www.tiktok.com/tiktokstudio/upload")
         tiktok_logger.info(f'[+]Uploading-------{self.title}.mp4')
 
-        await page.wait_for_url("https://www.tiktok.com/tiktokstudio/upload", timeout=30000)
+        await page.wait_for_url("https://www.tiktok.com/tiktokstudio/upload", timeout=60000)
         # 打印日志
         tiktok_logger.info(f"[+]Waiting for upload page to load.")
 
