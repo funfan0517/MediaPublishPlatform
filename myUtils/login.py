@@ -386,5 +386,77 @@ async def get_tiktok_cookie(id, status_queue):
         if 'browser' in locals():
             await browser.close()
 
+# Instagram登录
+async def get_instagram_cookie(id, status_queue):
+    try:
+        # 导入Instagram的logger和cookie_auth函数
+        from uploader.ins_uploader.main_chrome import instagram_logger, cookie_auth
+        
+        # 生成UUID并准备cookie文件路径
+        uuid_v1 = uuid.uuid1()
+        cookies_dir = Path(BASE_DIR / "cookiesFile")
+        cookies_dir.mkdir(exist_ok=True)
+        account_file = cookies_dir / f"{uuid_v1}.json"
+        
+        async with async_playwright() as playwright:
+            options = {
+                'args': [
+                    '--lang en-GB',
+                ],
+                'headless': LOCAL_CHROME_HEADLESS,  # 设置为非无头模式以允许用户登录
+            }
+            browser = await playwright.chromium.launch(**options)
+            context = await browser.new_context()
+            context = await set_init_script(context)
+            page = await context.new_page()
+            
+            # 访问Instagram登录页面
+            await page.goto("https://www.instagram.com/accounts/login/")
+            
+            # 提示用户登录
+            instagram_logger().info("请在浏览器中完成Instagram登录...")
+            status_queue.put("请在浏览器中完成Instagram登录...")
+            
+            # 等待用户完成登录，检查是否成功跳转到主页
+            try:
+                # 等待URL变化，表明登录成功
+                await page.wait_for_url("https://www.instagram.com/", timeout=300000)  # 5分钟超时
+                instagram_logger().success("✅ Instagram 登录成功")
+            except Exception as e:
+                instagram_logger().error(f"[+] Instagram 登录超时或失败: {str(e)}")
+                status_queue.put("500")
+                return None
+            
+            # 保存cookie
+            await context.storage_state(path=account_file)
+            instagram_logger().success("✅ Instagram cookie 已保存")
+            
+            # 验证cookie是否有效
+            result = await cookie_auth(account_file)
+            if not result:
+                instagram_logger().error("[+] Instagram cookie 验证失败")
+                status_queue.put("500")
+                return None
+            
+            # 保存账号信息到数据库，Instagram平台ID设置为6
+            with sqlite3.connect(Path(BASE_DIR / "db" / "database.db")) as conn:
+                cursor = conn.cursor()
+                cursor.execute('''
+                                    INSERT INTO user_info (type, filePath, userName, status)
+                                    VALUES (?, ?, ?, ?)
+                                    ''', (6, f"{uuid_v1}.json", id, 1))
+                conn.commit()
+                instagram_logger().success("✅ Instagram 用户状态已记录")
+            
+            status_queue.put("200")
+            
+    except Exception as e:
+        print(f"[+] Instagram 登录过程出错: {str(e)}")
+        status_queue.put("500")
+    finally:
+        # 确保资源被释放
+        if 'browser' in locals():
+            await browser.close()
+
 # a = asyncio.run(xiaohongshu_cookie_gen(4,None))
 # print(a)

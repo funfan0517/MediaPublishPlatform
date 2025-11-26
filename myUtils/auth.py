@@ -9,6 +9,7 @@ from conf import BASE_DIR, LOCAL_CHROME_HEADLESS
 from utils.base_social_media import set_init_script
 from utils.log import tencent_logger, kuaishou_logger, douyin_logger
 from uploader.tk_uploader.main_chrome import tiktok_logger
+from uploader.ins_uploader.main_chrome import instagram_logger
 from pathlib import Path
 from uploader.xhs_uploader.main import sign_local
 
@@ -129,7 +130,53 @@ async def cookie_auth_tiktok(account_file):
             await browser.close()
             return False
 
+
+async def cookie_auth_instagram(account_file):
+    """
+    验证Instagram账号Cookie是否有效
+    
+    Args:
+        account_file: Cookie文件路径
+    
+    Returns:
+        bool: Cookie是否有效
+    """
+    async with async_playwright() as playwright:
+        browser = await playwright.chromium.launch(headless=True)
+        context = await browser.new_context(storage_state=account_file)
+        context = await set_init_script(context)
+        # 创建一个新的页面
+        page = await context.new_page()
+        # 访问Instagram创作者中心上传页面
+        await page.goto("https://www.instagram.com/create/upload/")
+        try:
+            # 等待页面加载完成
+            await page.wait_for_url("https://www.instagram.com/create/upload/", timeout=30000)
+            # 检查是否需要登录
+            try:
+                await page.get_by_text("Log in", timeout=15000)
+                instagram_logger.error("[instagram] Instagram cookie 失效，需要登录")
+                return False
+            except:
+                instagram_logger.success("[instagram] cookie 有效")
+                return True
+        except:
+            instagram_logger.error("[instagram] 等待 Instagram 页面超时，cookie 可能失效")
+            await context.close()
+            await browser.close()
+            return False
+
 async def check_cookie(type, file_path):
+    """
+    根据平台类型验证Cookie有效性
+    
+    Args:
+        type: 平台类型 (1:小红书, 2:腾讯视频号, 3:抖音, 4:快手, 5:TikTok, 6:Instagram)
+        file_path: Cookie文件路径
+    
+    Returns:
+        bool: Cookie是否有效
+    """
     match type:
         # 小红书
         case 1:
@@ -146,6 +193,9 @@ async def check_cookie(type, file_path):
         # TikTok
         case 5:
             return await cookie_auth_tiktok(Path(BASE_DIR / "cookiesFile" / file_path))
+        # Instagram
+        case 6:
+            return await cookie_auth_instagram(Path(BASE_DIR / "cookiesFile" / file_path))
         case _:
             return False
 
