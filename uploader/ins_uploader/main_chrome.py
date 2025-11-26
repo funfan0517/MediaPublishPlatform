@@ -261,24 +261,81 @@ class InstagramVideo(object):
             instagram_logger.info("[+]检测到登录页面，尝试点击Instagram登录按钮")
             try:
                 # 尝试查找并点击Instagram登录按钮
-                selector = 'div[role="button"]:has-text("使用 Instagram 登录")'
-                login_button = page.locator(selector)
-                if await login_button.count() > 0:
-                    instagram_logger.info(f"[+]找到Instagram登录按钮，选择器: {selector}")
+                # 支持中英文两种文本
+                login_buttons = [
+                    'div[role="button"]:has-text("使用 Instagram 登录")',
+                    'div[role="button"]:has-text("Log in with Instagram")',
+                    'button:has-text("使用 Instagram 登录")',
+                    'button:has-text("Log in with Instagram")'
+                ]
+                
+                login_button = None
+                found_selector = ""
+                for selector in login_buttons:
+                    count = await page.locator(selector).count()
+                    if count > 0:
+                        login_button = page.locator(selector)
+                        found_selector = selector
+                        break
+                
+                if login_button:
+                    instagram_logger.info(f"[+]找到Instagram登录按钮，选择器: {found_selector}")
                     await login_button.wait_for(state='visible', timeout=5000)
-                    await login_button.click()
-                    instagram_logger.info("[+]已点击Instagram登录按钮")                  
-                    # 等待页面跳转或加载完成
+                    
+                    # 监听新打开的页面
+                    new_page = None
+                    async with page.context.expect_page() as new_page_info:
+                        await login_button.click()
+                        instagram_logger.info("[+]已点击Instagram登录按钮，等待新页面打开")
+                    
+                    # 获取新打开的页面
+                    new_page = await new_page_info.value
+                    instagram_logger.info(f"[+]新页面已打开，URL: {new_page.url}")
+                    
+                    # 等待新页面加载完成
+                    await new_page.wait_for_load_state('networkidle', timeout=30000)
+                    
+                    # 等待用户登录完成
+                    # 根据截图，新页面是Instagram登录页面，URL包含"accounts/login/"
+                    instagram_logger.info("[+]等待用户在新页面完成登录...")
+                    
+                    # 等待新页面关闭或URL变化
+                    # 当用户在新页面完成登录后，新页面可能会自动关闭或跳转
+                    try:
+                        # 等待新页面关闭或URL不再包含登录相关关键词
+                        async with asyncio.timeout(120):  # 2分钟超时
+                            while True:
+                                # 检查新页面是否已关闭
+                                if new_page.is_closed():
+                                    instagram_logger.info("[+]新页面已自动关闭，登录完成")
+                                    break
+                                
+                                # 检查新页面URL是否变化
+                                new_page_url = new_page.url
+                                if "accounts/login/" not in new_page_url and "force_authentication" not in new_page_url:
+                                    instagram_logger.info(f"[+]新页面URL已变化，登录完成: {new_page_url}")
+                                    break
+                                
+                                # 等待1秒后再次检查
+                                await asyncio.sleep(1)
+                    except asyncio.TimeoutError:
+                        instagram_logger.warning("[+]等待用户登录超时")
+                    except Exception as wait_error:
+                        instagram_logger.warning(f"[+]等待登录过程中出错: {str(wait_error)}")
+                    
+                    # 如果新页面仍未关闭，则手动关闭
+                    if not new_page.is_closed():
+                        await new_page.close()
+                        instagram_logger.info("[+]已手动关闭新登录页面")
+                    
+                    # 等待原页面加载完成
                     await page.wait_for_load_state('networkidle', timeout=10000)
                     
-                    # 检查当前URL
+                    # 检查原页面当前URL
                     current_url = page.url
-                    instagram_logger.info(f"[+]点击后当前URL: {current_url}")
-                    # 检查是否成功跳转到创作中心
-                    if "latest/composer" in current_url:
-                        instagram_logger.info("[+]成功跳转到创作中心")
-                    else:
-                        instagram_logger.warning("[+]跳转后URL未包含创作中心路径，可能登录失败")
+                    instagram_logger.info(f"[+]原页面当前URL: {current_url}")
+                else:
+                    instagram_logger.warning("[+]未找到Instagram登录按钮")
             except Exception as e:
                 instagram_logger.error(f"[+]处理登录页面时出错: {str(e)}")
                 # 出错后尝试直接导航回创作中心
@@ -322,7 +379,8 @@ class InstagramVideo(object):
             await self.set_schedule_time(page, self.publish_date)
 
         await self.click_publish(page)
-        instagram_logger.success(f"video_id: {await self.get_last_video_id(page)}")
+        # 打印当前URL
+        instagram_logger.info(f"[+]Current URL after click publish: {page.url}")
 
         await context.storage_state(path=f"{self.account_file}")  # save cookie
         instagram_logger.info('  [instagram] update cookie！')
@@ -700,54 +758,10 @@ class InstagramVideo(object):
                     # 抛出异常，让调用者处理
                     raise Exception("未找到发布按钮")
 
-                # 检查并处理版权检查弹窗或其他确认弹窗
-                try:
-                    # 等待弹窗出现
-                    await page.wait_for_selector('button:has-text("Post now")', timeout=5000)
-                    instagram_logger.info("  [-]检测到版权检查弹窗，准备点击Post now按钮")
-                    
-                    # 点击Post now按钮
-                    await self.locator_base.locator('button:has-text("Post now")').click()
-                    instagram_logger.info("  [-]已点击Post now按钮")
-                    
-                    # 等待操作完成
-                    await page.wait_for_timeout(2000)
-                except Exception as e:
-                    instagram_logger.info(f"  [-]未检测到版权检查弹窗或点击失败: {str(e)}")
-
-                # 等待发布完成，Meta Business Suite可能会导航到不同的URL
-                try:
-                    # 等待URL变化或成功消息
-                    await asyncio.wait_for(
-                        asyncio.gather(
-                            # 等待URL变化
-                            page.wait_for_url("*business.facebook.com/*", timeout=30000),
-                            # 等待成功消息
-                            page.wait_for_selector('div:has-text("Published"):visible, div:has-text("Success"):visible', timeout=30000)
-                        ),
-                        timeout=60000
-                    )
-                    instagram_logger.success("  [-] video published success")
+                # 等待发布完成，发布成功后会跳转到内容日历页面
+                if "content_calendar" in page.url.lower():
+                    instagram_logger.success("  [-] video published success, detected content calendar in URL")
                     break
-                except Exception as e:
-                    # 检查是否有成功消息
-                    success_messages = [
-                        'div:has-text("Published")',
-                        'div:has-text("Success")',
-                        'div:has-text("Shared")',
-                        'div:has-text("Post published")',
-                        'div:has-text("Video published")'
-                    ]
-                    success_found = False
-                    for msg_selector in success_messages:
-                        if await self.locator_base.locator(msg_selector).count() > 0:
-                            instagram_logger.success("  [-] video published success")
-                            success_found = True
-                            break
-                    if success_found:
-                        break
-                    else:
-                        raise e
             except Exception as e:
                 instagram_logger.exception(f"  [-] Exception: {e}")
                 instagram_logger.info("  [-] video publishing")
