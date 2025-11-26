@@ -259,88 +259,21 @@ class InstagramVideo(object):
         # 如果跳转到登录页面，尝试点击Instagram登录按钮
         if "loginpage" in current_url or "login" in current_url:
             instagram_logger.info("[+]检测到登录页面，尝试点击Instagram登录按钮")
-            
-            # 尝试查找并点击Instagram登录按钮
             try:
-                # 定义多种可能的Instagram登录按钮选择器
-                instagram_login_selectors = [
-                    # 按钮元素 - 中文和英文
-                    'button:has-text("使用 Instagram 登录")',
-                    'button:has-text("Log in with Instagram")',
-                    # 可能的变体 - 无空格
-                    'button:has-text("使用Instagram登录")',
-                    'button:has-text("使用instagram登录")',
-                    # 包含特定文本的按钮
-                    'button:has-text("Instagram")',
-                    'button:has-text("instagram")',
-                    # 基于角色和文本的选择器
-                    'div[role="button"]:has-text("使用 Instagram 登录")',
-                    'div[role="button"]:has-text("Log in with Instagram")',
-                    # 基于span文本的选择器
-                    'span:has-text("使用 Instagram 登录")',
-                    'span:has-text("使用Instagram登录")',
-                    # 包含Instagram图标的按钮
-                    'button:has(svg[aria-label="Instagram"])',
-                    'div[role="button"]:has(svg[aria-label="Instagram"])',
-                    # 基于类名的选择器
-                    'button[data-testid="login-with-instagram-button"]',
-                    'div[data-testid="login-with-instagram-button"]'
-                ]
-                
-                login_button = None
-                found_selector = ""
-                
-                # 遍历所有选择器，查找可用的登录按钮
-                for selector in instagram_login_selectors:
-                    count = await page.locator(selector).count()
-                    if count > 0:
-                        login_button = page.locator(selector)
-                        found_selector = selector
-                        break
-                
-                if login_button:
-                    instagram_logger.info(f"[+]找到Instagram登录按钮，选择器: {found_selector}")
-                    
-                    # 等待按钮可见
+                # 尝试查找并点击Instagram登录按钮
+                selector = 'div[role="button"]:has-text("使用 Instagram 登录")'
+                login_button = page.locator(selector)
+                if await login_button.count() > 0:
+                    instagram_logger.info(f"[+]找到Instagram登录按钮，选择器: {selector}")
                     await login_button.wait_for(state='visible', timeout=5000)
-                    
-                    # 点击登录按钮
                     await login_button.click()
-                    instagram_logger.info("[+]已点击Instagram登录按钮")
-                    
+                    instagram_logger.info("[+]已点击Instagram登录按钮")                  
                     # 等待页面跳转或加载完成
                     await page.wait_for_load_state('networkidle', timeout=10000)
                     
                     # 检查当前URL
                     current_url = page.url
                     instagram_logger.info(f"[+]点击后当前URL: {current_url}")
-                    
-                    # 处理跳转到Instagram登录页面的情况
-                    if "instagram.com/accounts/login" in current_url:
-                        instagram_logger.info("[+]跳转到Instagram登录页面，使用cookie自动登录")
-                        
-                        # 等待登录完成（使用已保存的cookie）
-                        await page.wait_for_load_state('networkidle', timeout=15000)
-                        
-                        # 检查是否登录成功并跳转回Meta Business Suite
-                        try:
-                            await page.wait_for_url("https://business.facebook.com/**", timeout=15000)
-                            instagram_logger.info("[+]已成功登录并跳转回Meta Business Suite")
-                        except TimeoutError:
-                            instagram_logger.warning("[+]登录后未自动跳转，尝试手动导航回创作中心")
-                            await page.goto("https://business.facebook.com/latest/composer")
-                            await page.wait_for_load_state('networkidle')
-                    elif "business.facebook.com" in current_url:
-                        instagram_logger.info("[+]已成功登录，无需跳转")
-                    else:
-                        instagram_logger.warning(f"[+]登录后跳转到未知页面: {current_url}，尝试手动导航回创作中心")
-                        await page.goto("https://business.facebook.com/latest/composer")
-                        await page.wait_for_load_state('networkidle')
-                else:
-                    instagram_logger.warning("[+]未找到Instagram登录按钮，继续尝试直接访问")
-                    # 尝试直接导航回创作中心
-                    await page.goto("https://business.facebook.com/latest/composer")
-                    await page.wait_for_load_state('networkidle')
             except Exception as e:
                 instagram_logger.error(f"[+]处理登录页面时出错: {str(e)}")
                 # 出错后尝试直接导航回创作中心
@@ -352,14 +285,9 @@ class InstagramVideo(object):
         
         # 确保最终在正确的创作中心页面
         await page.goto("https://business.facebook.com/latest/composer")
-        # 打印日志
-        instagram_logger.info(f"[+]Waiting for Meta Business Suite composer page to load.")
-
         await page.wait_for_load_state('networkidle')
+        instagram_logger.info("[+]Meta Business Suite composer page loaded.")
 
-                # 确保最终在正确的创作中心页面
-        await page.goto("https://business.facebook.com/latest/composer")
-        
         # 选择基本定位器
         await self.choose_base_locator(page)
 
