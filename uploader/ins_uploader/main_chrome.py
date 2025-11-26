@@ -346,8 +346,11 @@ class InstagramVideo(object):
                     instagram_logger.error(f"[+]尝试导航回创作中心失败: {str(goto_error)}")
         
         # 确保最终在正确的创作中心页面
-        await page.goto("https://business.facebook.com/latest/composer")
-        await page.wait_for_load_state('networkidle')
+        # 如果当前页面不是创作中心，尝试导航到创作中心
+        if "latest/composer" not in page.url:
+            instagram_logger.info("[+]当前页面不是创作中心，尝试导航到创作中心")
+            await page.goto("https://business.facebook.com/latest/composer")
+            await page.wait_for_load_state('networkidle')
         # 打印当前URL
         instagram_logger.info(f"[+]Current URL after goto composer page: {page.url}")
 
@@ -532,13 +535,6 @@ class InstagramVideo(object):
                 publish_selector = '*[role="button"]:has(:text("Publish"))'
                 
                 publish_button = self.locator_base.locator(publish_selector)
-                await publish_button.wait_for(state='visible')
-                
-                # 检查按钮是否可用
-                if await publish_button.is_disabled():
-                    instagram_logger.info("  [-] 发布按钮不可用，等待...")
-                    await asyncio.sleep(1)
-                    continue
                 
                 # 点击发布按钮
                 await publish_button.click()
