@@ -223,6 +223,21 @@
             </template>
           </el-dialog>
 
+          <!-- 平台选择 -->
+          <div class="platform-section">
+            <h3>平台</h3>
+            <el-radio-group v-model="tab.selectedPlatform" class="platform-radios">
+              <el-radio 
+                v-for="platform in platforms" 
+                :key="platform.key"
+                :label="platform.key"
+                class="platform-radio"
+              >
+                {{ platform.name }}
+              </el-radio>
+            </el-radio-group>
+          </div>
+
           <!-- 账号选择 -->
           <div class="account-section">
             <h3>账号</h3>
@@ -243,6 +258,7 @@
                 plain 
                 @click="openAccountDialog(tab)"
                 class="select-account-btn"
+                :disabled="!tab.selectedPlatform"
               >
                 选择账号
               </el-button>
@@ -257,7 +273,13 @@
             class="account-dialog"
           >
             <div class="account-dialog-content">
-              <el-checkbox v-model="selectAllAccounts" @change="handleSelectAllChange" class="select-all-checkbox">全选</el-checkbox>
+              <!-- 只有在有多个账号时才显示全选按钮 -->
+              <el-checkbox 
+                v-if="availableAccounts.length > 1" 
+                v-model="selectAllAccounts" 
+                @change="handleSelectAllChange" 
+                class="select-all-checkbox"
+              >全选</el-checkbox>
               <el-checkbox-group v-model="tempSelectedAccounts">
                 <div class="account-list">
                   <el-checkbox
@@ -281,21 +303,6 @@
               </div>
             </template>
           </el-dialog>
-
-          <!-- 平台选择 -->
-          <div class="platform-section">
-            <h3>平台</h3>
-            <el-radio-group v-model="tab.selectedPlatform" class="platform-radios">
-              <el-radio 
-                v-for="platform in platforms" 
-                :key="platform.key"
-                :label="platform.key"
-                class="platform-radio"
-              >
-                {{ platform.name }}
-              </el-radio>
-            </el-radio-group>
-          </div>
 
           <!-- 草稿选项 (仅在视频号可见) -->
           <div v-if="tab.selectedPlatform === 2" class="draft-section">
@@ -504,13 +511,14 @@
 </template>
 
 <script setup>
-import { ref, reactive, computed } from 'vue'
+import { ref, reactive, computed, watch, onMounted } from 'vue'
 import { Upload, Plus, Close, Folder } from '@element-plus/icons-vue'
 import { ElMessage } from 'element-plus'
 import { useAccountStore } from '@/stores/account'
 import { useAppStore } from '@/stores/app'
 import { materialApi } from '@/api/material'
 import { publishApi } from '@/api/publish'
+import { accountApi } from '@/api/account'
 
 // API base URL
 const apiBaseUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5409'
@@ -594,8 +602,37 @@ const tempSelectedAccounts = ref([])
 const currentTab = ref(null)
 const selectAllAccounts = ref(false)
 
+// 监听平台选择变化，当平台改变时清空已选择的账号
+watch(() => currentTab.value?.selectedPlatform, (newPlatform, oldPlatform) => {
+  if (currentTab.value && newPlatform !== oldPlatform && oldPlatform !== undefined) {
+    // 平台发生变化，清空已选择的账号
+    currentTab.value.selectedAccounts = []
+    ElMessage.info('平台已切换，请重新选择账号')
+  }
+})
+
 // 获取账号状态管理
 const accountStore = useAccountStore()
+
+// 加载账号数据
+const loadAccounts = async () => {
+  try {
+    const response = await accountApi.getAccounts()
+    if (response.code === 200) {
+      accountStore.setAccounts(response.data)
+    } else {
+      ElMessage.error('加载账号数据失败：' + response.msg)
+    }
+  } catch (error) {
+    console.error('加载账号数据失败：', error)
+    ElMessage.error('加载账号数据失败')
+  }
+}
+
+// 组件挂载时加载账号数据
+onMounted(() => {
+  loadAccounts()
+})
 
 // 根据选择的平台获取可用账号列表
 const availableAccounts = computed(() => {

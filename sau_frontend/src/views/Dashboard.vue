@@ -52,7 +52,7 @@
                       size="small"
                       :type="getPlatformTagType(item.platform)"
                     >
-                      {{ item.count }}
+                      {{ item.platform }}: {{ item.count }}
                     </el-tag>
                   </el-tooltip>
                 </template>
@@ -120,7 +120,7 @@
             </el-card>
           </el-col>
           <el-col :span="6">
-            <el-card class="action-card">
+            <el-card class="action-card" @click="navigateTo('/material-management')">
               <div class="action-icon">
                 <el-icon><Upload /></el-icon>
               </div>
@@ -129,7 +129,7 @@
             </el-card>
           </el-col>
           <el-col :span="6">
-            <el-card class="action-card">
+            <el-card class="action-card" @click="navigateTo('/publish-center')">
               <div class="action-icon">
                 <el-icon><Timer /></el-icon>
               </div>
@@ -138,7 +138,7 @@
             </el-card>
           </el-col>
           <el-col :span="6">
-            <el-card class="action-card">
+            <el-card class="action-card" @click="navigateTo('/data')">
               <div class="action-icon">
                 <el-icon><DataAnalysis /></el-icon>
               </div>
@@ -257,9 +257,12 @@ const recentTasks = ref([])
 // 平台映射
 const platformMap = {
   1: { name: '小红书', type: 'xiaohongshu' },
-  2: { name: '快手', type: 'kuaishou' },
+  2: { name: '视频号', type: 'weixin' },
   3: { name: '抖音', type: 'douyin' },
-  4: { name: '视频号', type: 'weixin' }
+  4: { name: '快手', type: 'kuaishou' },
+  5: { name: 'TikTok', type: 'tiktok' },
+  6: { name: 'Instagram', type: 'instagram' },
+  7: { name: 'Facebook', type: 'facebook' }
 }
 
 // 获取平台统计数据
@@ -275,7 +278,7 @@ async function fetchPlatformStats() {
       accountStats.abnormal = accountStats.total - accountStats.normal
       
       // 更新平台分布
-      platformStats.total = data.data.overall.total_accounts || 0
+      platformStats.total = data.data.platform_stats.length || 0  // 平台数量
       platformStats.distribution = []
       
       data.data.platform_stats.forEach(stat => {
@@ -291,6 +294,9 @@ async function fetchPlatformStats() {
         if (platform.name === '抖音') platformStats.douyin = stat.total
         if (platform.name === '视频号') platformStats.channels = stat.total
         if (platform.name === '小红书') platformStats.xiaohongshu = stat.total
+        if (platform.name === 'TikTok') platformStats.tiktok = stat.total
+        if (platform.name === 'Instagram') platformStats.instagram = stat.total
+        if (platform.name === 'Facebook') platformStats.facebook = stat.total
       })
     }
   } catch (error) {
@@ -329,6 +335,8 @@ const getPlatformTagType = (platform) => {
     '视频号': 'warning',
     '小红书': 'info',
     'TikTok': 'primary',
+    'Instagram': 'primary',
+    'Facebook': 'primary',
     '未知': 'default'
   }
   return typeMap[platform] || 'default'
@@ -499,22 +507,75 @@ const cancelTask = (task) => {
           justify-content: space-between;
           color: $text-secondary;
           font-size: 13px;
+          overflow-x: auto;
+          white-space: nowrap;
+          padding-bottom: 5px;
           
           .el-tag {
             margin-right: 5px;
+            flex-shrink: 0;
+          }
+          
+          &::-webkit-scrollbar {
+            height: 4px;
+          }
+          
+          &::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 2px;
+          }
+          
+          &::-webkit-scrollbar-thumb {
+            background: #c1c1c1;
+            border-radius: 2px;
+            
+            &:hover {
+              background: #a8a8a8;
+            }
           }
         }
       }
     }
     
     .quick-actions {
-      margin: 20px 0 30px;
-      
-      h2 {
-        font-size: 18px;
-        margin-bottom: 15px;
-        color: $text-primary;
-      }
+        margin: 20px 0 30px;
+        
+        h2 {
+          font-size: 18px;
+          margin-bottom: 15px;
+          color: $text-primary;
+        }
+        
+        .el-row {
+          overflow-x: auto;
+          white-space: nowrap;
+          flex-wrap: nowrap;
+          margin: 0 -10px;
+          padding: 0 10px 10px;
+          
+          .el-col {
+            flex-shrink: 0;
+            padding: 0 10px;
+          }
+          
+          &::-webkit-scrollbar {
+            height: 4px;
+          }
+          
+          &::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 2px;
+          }
+          
+          &::-webkit-scrollbar-thumb {
+            background: #c1c1c1;
+            border-radius: 2px;
+            
+            &:hover {
+              background: #a8a8a8;
+            }
+          }
+        }
       
       .action-card {
         height: 160px;
