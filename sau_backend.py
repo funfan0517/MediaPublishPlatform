@@ -203,7 +203,7 @@ def getAccounts():
             rows_list = [list(row) for row in rows]
 
             print("\n📋 当前数据表内容（快速获取）：")
-            for row in rows:
+            for row in rows_list:
                 print(row)
 
             return jsonify(
@@ -223,7 +223,6 @@ def getAccounts():
 
 @app.route("/getValidAccounts",methods=['GET'])
 async def getValidAccounts():
-    # 平台类型:1抖音 2腾讯 3快手 4小红书 5TikTok
     platform_type = request.args.get('type', type=int, default=0)
     
     with sqlite3.connect(Path(BASE_DIR / "db" / "database.db")) as conn:
@@ -238,7 +237,7 @@ async def getValidAccounts():
         for row in rows:
             print(row)
         # 定义并发限制数量
-        CONCURRENCY_LIMIT = 5  # 可以根据系统资源调整
+        CONCURRENCY_LIMIT = 10  # 可以根据系统资源调整
         
         # 使用并发方式验证cookie
         async def check_and_update_cookie(row):
