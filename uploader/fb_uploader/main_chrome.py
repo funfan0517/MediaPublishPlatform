@@ -178,27 +178,24 @@ class FacebookVideo(object):
     async def upload_video_file(self, page):
         """
         作用：上传视频文件
-        网页中相关按钮：上传视频文件的按钮元素为（div[aria-label='照片/视频']:visible）
+        网页中相关按钮：上传视频文件的按钮元素为（）
         """
         try:
             # 点击上传按钮（照片/视频），使用指定的选择器
-            upload_selector = "div[aria-label='照片/视频']:visible"
-            
+            upload_selector = 'div[aria-label="照片/视频"]'
             upload_button = self.locator_base.locator(upload_selector)
             await upload_button.wait_for(state='visible', timeout=30000)
             
             logger.info(f"[+] 找到照片/视频上传按钮，选择器: {upload_selector}")
-            await upload_button.click()
-            logger.info("[+] 成功点击照片/视频上传按钮")
             
             # 上传按钮，需要点击触发系统文件选择器
             async with page.expect_file_chooser() as fc_info:
-                await upload_element.click()
-                instagram_logger.info("[+] 点击上传按钮，等待系统文件选择器")
+                await upload_button.click()
+                logger.info("[+] 点击上传按钮，等待系统文件选择器")
             file_chooser = await fc_info.value
             await file_chooser.set_files(self.file_path)
-            instagram_logger.info("[+] 通过系统文件选择器设置文件")
-            instagram_logger.info("[+] 视频文件已选择")
+            logger.info(f"[+] 通过系统文件选择器设置文件: {self.file_path}")
+            logger.info("[+] 视频文件已选择")
         except Exception as e:
             logger.error(f"选择视频文件失败: {str(e)}")
             raise
@@ -222,7 +219,7 @@ class FacebookVideo(object):
         logger.info("Facebook页面DOM加载完成")
         
         # 选择基础定位器
-        self.choose_base_locator(page)
+        await self.choose_base_locator(page)
 
         # 上传视频文件
         await self.upload_video_file(page)
@@ -261,43 +258,47 @@ class FacebookVideo(object):
         作用：添加标题和标签
         网页中相关按钮：添加标题和标签的按钮选择器（）
         """
-        # 使用更通用的选择器定位标题输入框，支持中文和英文界面
-        editor_locators = [
-            # 中文界面选择器
-            '[contenteditable="true"][role="textbox"][data-lexical-editor="true"]',
-            '[aria-placeholder*="分享你的新鲜事"][contenteditable="true"]',
-            # 英文界面选择器
-            '[aria-label="Add a description"]',
-            '[aria-label="Write something..."]'
-        ]
-        
-        editor_locator = None
-        for selector in editor_locators:
-            if await self.locator_base.locator(selector).count() > 0:
-                editor_locator = self.locator_base.locator(selector)
-                break
-        
-        if not editor_locator:
-            raise Exception("未找到标题输入框")
-        
-        await editor_locator.click()
-        
-        await page.keyboard.press("End")
-        await page.keyboard.press("Control+A")
-        await page.keyboard.press("Delete")
-        await page.keyboard.press("End")
-        
-        await page.wait_for_timeout(1000)  # 等待1秒
-        
-        await page.keyboard.insert_text(self.title)
-        await page.wait_for_timeout(1000)  # 等待1秒
-        await page.keyboard.press("End")
-        
-        await page.keyboard.press("Enter")
-        await page.keyboard.press("Enter")
-        
-        # 添加标签
-        await page.keyboard.insert_text(self.tags)
+        try:
+            # 使用更通用的选择器定位标题输入框，支持中文和英文界面
+            editor_locators = [
+                # 中文界面选择器
+                '[contenteditable="true"][role="textbox"][data-lexical-editor="true"]',
+                '[aria-placeholder*="分享你的新鲜事"][contenteditable="true"]',
+                # 英文界面选择器
+                '[aria-label="Add a description"]',
+                '[aria-label="Write something..."]'
+            ]
+            editor_locator = None
+            for selector in editor_locators:
+                if await self.locator_base.locator(selector).count() > 0:
+                    editor_locator = self.locator_base.locator(selector)
+                    break
+            if not editor_locator:
+                raise Exception("未找到标题输入框")
+            await editor_locator.click()
+            
+            # 清空现有内容
+            await page.keyboard.press("Control+A")
+            await page.keyboard.press("Delete")         
+            await page.wait_for_timeout(500)  # 等待500毫秒
+                
+            # 输入标题
+            await page.keyboard.insert_text(self.title)
+            await page.wait_for_timeout(500)  # 等待500毫秒
+                
+            # 输入标签
+            if self.tags:
+                await page.keyboard.press("Enter")
+                await page.keyboard.press("Enter")
+                    
+                for index, tag in enumerate(self.tags, start=1):
+                    logger.info("Setting the %s tag" % index)
+                    await page.keyboard.insert_text(f"#{tag} ")
+                    await page.wait_for_timeout(300)  # 等待300毫秒
+                
+            logger.info("[+] 已添加标题和标签")
+        except Exception as e:
+            logger.error(f"添加标题和标签失败: {str(e)}")
 
     async def upload_thumbnails(self, page):
         """
@@ -349,21 +350,6 @@ class FacebookVideo(object):
                 logger.exception(f"  [-] Exception: {e}")
                 logger.info("  [-] video publishing")
                 await asyncio.sleep(0.5)
-
-    async def get_last_video_id(self, page):
-        """
-        获取最后发布的视频ID
-        """
-        try:
-            await page.wait_for_selector('div[data-qa="media-grid"]')
-            video_list_locator = self.locator_base.locator('div[data-qa="media-grid"] div[data-qa="media-item"] a')
-            if await video_list_locator.count():
-                first_video_obj = await video_list_locator.nth(0).get_attribute('href')
-                video_id = re.search(r'video/([0-9]+)', first_video_obj).group(1) if first_video_obj else None
-                return video_id
-        except Exception as e:
-            logger.warning(f"  [-] Failed to get video ID: {str(e)}")
-        return None
 
     async def detect_upload_status(self, page):
         """
