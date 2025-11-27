@@ -147,7 +147,8 @@ class FacebookVideo(object):
         """
         设置定时发布时间
         """
-        schedule_button = page.locator("//span[text()='Schedule']")
+        schedule_button = self.locator_base.locator("//span[text()='Schedule']")
+        logger.info(f"  [-] 将点击定时发布按钮: {await schedule_button.text_content()}")
         await schedule_button.wait_for(state='visible')
         await schedule_button.click()
 
@@ -182,20 +183,17 @@ class FacebookVideo(object):
         """
         try:
             # 点击上传按钮（照片/视频），使用指定的选择器
-            upload_selector = 'div[aria-label="照片/视频"]'
-            upload_button = self.locator_base.locator(upload_selector)
+            facebook_upload_selector = 'div[aria-label="照片/视频"]'
+            logger.info(f"  [-] 将点击上传视频按钮: {facebook_upload_selector}")
+            upload_button = self.locator_base.locator(facebook_upload_selector)
             await upload_button.wait_for(state='visible', timeout=30000)
-            
-            logger.info(f"[+] 找到照片/视频上传按钮，选择器: {upload_selector}")
             
             # 上传按钮，需要点击触发系统文件选择器
             async with page.expect_file_chooser() as fc_info:
                 await upload_button.click()
-                logger.info("[+] 点击上传按钮，等待系统文件选择器")
             file_chooser = await fc_info.value
             await file_chooser.set_files(self.file_path)
-            logger.info(f"[+] 通过系统文件选择器设置文件: {self.file_path}")
-            logger.info("[+] 视频文件已选择")
+            logger.info(f"通过系统文件选择器上传文件: {self.file_path}")
         except Exception as e:
             logger.error(f"选择视频文件失败: {str(e)}")
             raise
@@ -204,54 +202,67 @@ class FacebookVideo(object):
         """
         作用：执行视频上传
         """
+        logger.info(f'[+]Start Uploading-------{self.title}')
+        # step1.创建浏览器实例
         browser = await playwright.chromium.launch(
             headless=self.headless, 
             executable_path=self.local_executable_path
         )
+        logger.info("step1：【Facebook】浏览器实例已创建")
+
+
+        # step2.创建上下文并加载cookie
         context = await browser.new_context(storage_state=f"{self.account_file}")
         context = await set_init_script(context)
+        logger.info("step2：【Facebook】上下文已创建并加载cookie")
+
+
+        # step3.创建新页面，导航到上传页面，明确指定等待domcontentloaded状态
         page = await context.new_page()
-
+        facebook_url = "https://www.facebook.com/"
+        await page.goto(facebook_url, wait_until='domcontentloaded', timeout=60000)
+        logger.info("step3：【Facebook】创作中心页面已加载完成")
         
-        logger.info(f'[+]Start Uploading-------{self.title}')
-        # 导航到上传页面，明确指定等待domcontentloaded状态
-        await page.goto("https://www.facebook.com/", wait_until='domcontentloaded', timeout=60000)
-        logger.info("Facebook页面DOM加载完成")
-        
-        # 选择基础定位器
+        # step4.选择基础定位器
         await self.choose_base_locator(page)
+        logger.info("step4：【Facebook】基础定位器已选择")
 
-        # 上传视频文件
+        # step5.上传视频文件
         await self.upload_video_file(page)
+        logger.info("step5：【Facebook】视频文件已上传")
 
-        # 添加标题和标签
-        await self.add_title_tags(page)
-        
-        # 检测上传状态
+        # step6.检测上传状态
         await self.detect_upload_status(page)
+        logger.info("step6：【Facebook】视频上传状态检测完成")
         
-        # 上传缩略图（如果有）
+        # step7.添加标题和标签
+        await self.add_title_tags(page)
+        logger.info("step7：【Facebook】标题和标签已添加")
+        
+        # step8.上传缩略图（如果有）
         if self.thumbnail_path:
             logger.info(f'[+] Uploading thumbnail file {self.title}')
             await self.upload_thumbnails(page)
+            logger.info("step8：【Facebook】缩略图已上传")
 
-        # 设置定时发布（如果需要）
+        # step9.设置定时发布（如果需要）
         if self.publish_date != 0:
             await self.set_schedule_time(page, self.publish_date)
+            logger.info("step9：【Facebook】定时发布时间已设置")
 
-        # 点击发布
+        # step10.点击发布
         await self.click_publish(page)
-        video_id = await self.get_last_video_id(page)
-        logger.info(f"[+] video_id: {video_id}")
+        logger.info("step10：【Facebook】视频已发布")   
 
-        # 保存cookie
+        # step11.重新保存最新cookie
         await context.storage_state(path=f"{self.account_file}")  
-        logger.info('  [facebook] update cookie！')
+        logger.info("step11：【Facebook】cookie已更新")
         await asyncio.sleep(2)  # close delay for look the video status
         
-        # 关闭所有
+        # step12.关闭所有页面和浏览器上下文
         await context.close()
         await browser.close()
+        logger.info("step12：【Facebook】浏览器实例已关闭")
 
     async def add_title_tags(self, page):
         """
@@ -260,7 +271,7 @@ class FacebookVideo(object):
         """
         try:
             # 使用更通用的选择器定位标题输入框，支持中文和英文界面
-            editor_locators = [
+            facebook_editor_locators = [
                 # 中文界面选择器
                 '[contenteditable="true"][role="textbox"][data-lexical-editor="true"]',
                 '[aria-placeholder*="分享你的新鲜事"][contenteditable="true"]',
@@ -268,10 +279,12 @@ class FacebookVideo(object):
                 '[aria-label="Add a description"]',
                 '[aria-label="Write something..."]'
             ]
+
             editor_locator = None
-            for selector in editor_locators:
+            for selector in facebook_editor_locators:
                 if await self.locator_base.locator(selector).count() > 0:
                     editor_locator = self.locator_base.locator(selector)
+                    logger.info(f"  [-] 将点击标题输入框: {await editor_locator.text_content()}")
                     break
             if not editor_locator:
                 raise Exception("未找到标题输入框")
@@ -294,9 +307,8 @@ class FacebookVideo(object):
                 for index, tag in enumerate(self.tags, start=1):
                     logger.info("Setting the %s tag" % index)
                     await page.keyboard.insert_text(f"#{tag} ")
-                    await page.wait_for_timeout(300)  # 等待300毫秒
-                
-            logger.info("[+] 已添加标题和标签")
+                    await page.wait_for_timeout(300)
+                      # 等待300毫秒
         except Exception as e:
             logger.error(f"添加标题和标签失败: {str(e)}")
 
@@ -308,6 +320,7 @@ class FacebookVideo(object):
         try:
             # 等待并点击缩略图上传按钮
             thumbnail_button = self.locator_base.locator("//span[contains(text(), 'Add')] >> visible=true")
+            logger.info(f"  [-] 将点击上传缩略图按钮: {await thumbnail_button.text_content()}")
             await thumbnail_button.click()
             
             # 上传缩略图文件
@@ -338,13 +351,12 @@ class FacebookVideo(object):
                 
                 # 打印publish_button的文本
                 button_text = await publish_button.text_content() if await publish_button.count() > 0 else "Not found"
-                logger.info(f"  [-] publish_button text: {button_text}")
+                logger.info(f"  [-] 将点击发布按钮: {button_text}")
                 
                 if await publish_button.count():
                     await publish_button.click()
 
                 await page.wait_for_url("https://www.facebook.com/",  timeout=60000)
-                logger.info("  [-] video published success")
                 break
             except Exception as e:
                 logger.exception(f"  [-] Exception: {e}")
@@ -359,7 +371,7 @@ class FacebookVideo(object):
         while True:
             try:
                 # 匹配中文发帖按钮和英文发布按钮，与click_publish方法保持一致
-                publish_button = self.locator_base.locator('//span[text()="发帖"]').or_(
+                facebook_publish_button = self.locator_base.locator('//span[text()="发帖"]').or_(
                     self.locator_base.locator('//span[text()="Post"]').or_(
                         self.locator_base.locator('//span[text()="Schedule"]').or_(
                             self.locator_base.locator('//span[text()="发布"]')
@@ -368,18 +380,15 @@ class FacebookVideo(object):
                 )
                 
                 # 检查发布按钮是否可点击
-                if await publish_button.get_attribute("disabled") is None:
+                if await facebook_publish_button.get_attribute("disabled") is None:
                     logger.info("  [-]video uploaded.")
                     break
                 else:
                     logger.info("  [-] video uploading...")
                     await asyncio.sleep(2)
                     # 检查是否有错误需要重试，使用中文和英文选择器
-                    add_file_buttons = [
-                        "//span[text()='添加照片/视频']",
-                        "//span[text()='Add Photos/Videos']"
-                    ]
-                    for selector in add_file_buttons:
+                    facebook_upload_selector = ['div[aria-label="照片/视频"]']
+                    for selector in facebook_upload_selector:
                         if await self.locator_base.locator(selector).count():
                             logger.info("  [-] found some error while uploading now retry...")
                             await self.handle_upload_error(page)
