@@ -42,7 +42,9 @@ class xhsVideoUploader(object):
         # 登录页面URL
         self.login_url = "https://creator.xiaohongshu.com/login"
         # 视频上传页面URL
-        self.creator_url = "https://creator.xiaohongshu.com/publish/publish?from=homepage&target=video&openFilePicker=true"
+        self.creator_video_url = "https://creator.xiaohongshu.com/publish/publish?from=homepage&target=video&openFilePicker=true"
+        # 图文上传页面URL
+        self.creator_image_url = "https://creator.xiaohongshu.com/publish/publish?from=homepage&target=image&openFilePicker=true"
 
         # Selector lists
         # 上传按钮选择器
@@ -157,7 +159,7 @@ class xhsVideoUploader(object):
 
         # step3.创建新页面，导航到上传页面，明确指定等待domcontentloaded状态
         page = await context.new_page()
-        await page.goto(self.creator_url, wait_until='domcontentloaded', timeout=self.page_load_timeout)
+        await page.goto(self.creator_video_url, wait_until='domcontentloaded', timeout=self.page_load_timeout)
         logger.info(f"step3: {self.platform_name}页面加载完成")
         
         # step4.选择基础定位器
