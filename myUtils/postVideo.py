@@ -7,6 +7,7 @@ from uploader.ks_uploader.main import KSVideo
 from uploader.tk_uploader.main_chrome import TiktokVideo
 from uploader.tencent_uploader.main import TencentVideo
 from uploader.xiaohongshu_uploader.main import XiaoHongShuVideo
+from uploader.xiaohongshu_uploader.xhsVideoUploader import xhsVideoUploader
 from uploader.xiaohongshu_uploader.xhsImageUploader import xhsImageUploader
 from uploader.ins_uploader.main_chrome import InstagramVideo
 from uploader.fb_uploader.main_chrome import FacebookVideo
@@ -93,7 +94,8 @@ def post_video_xhs(title,files,tags,account_file,category=TencentZoneTypes.LIFES
             if file_type == 2:
                 app = xhsImageUploader(cookie, file, title, text, tags, publish_datetimes)
             else:
-                app = XiaoHongShuVideo(title, file, tags, publish_datetimes, cookie)
+                app = xhsVideoUploader(cookie, file, title, text, tags, publish_datetimes)
+                #app = XiaoHongShuVideo(title, file, tags, publish_datetimes, cookie)
             asyncio.run(app.main(), debug=False)
 
 
