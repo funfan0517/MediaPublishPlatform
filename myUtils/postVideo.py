@@ -75,7 +75,7 @@ def post_video_ks(title,files,tags,account_file,category=TencentZoneTypes.LIFEST
             app = KSVideo(title, str(file), tags, publish_datetimes[index], cookie)
             asyncio.run(app.main(), debug=False)
 
-def post_video_xhs(title,files,tags,account_file,category=TencentZoneTypes.LIFESTYLE.value,enableTimer=False,videos_per_day = 1, daily_times=None,start_days = 0,file_type=1,text=''):
+def post_video_xhs(title,files,tags,account_file,category=TencentZoneTypes.LIFESTYLE.value,enableTimer=False,videos_per_day = 1, daily_times=None,start_days = 0,file_type=2,text=''):
     # 生成文件的完整路径
     account_file = [Path(BASE_DIR / "cookiesFile" / file) for file in account_file]
     files = [Path(BASE_DIR / "videoFile" / file) for file in files]
@@ -91,11 +91,7 @@ def post_video_xhs(title,files,tags,account_file,category=TencentZoneTypes.LIFES
             print(f"标题：{title}")
             print(f"Hashtag：{tags}")
             print(f"file_type：{file_type}")
-            if file_type == 2:
-                app = xhsImageUploader(cookie, file, title, text, tags, publish_datetimes)
-            else:
-                app = xhsVideoUploader(cookie, file, title, text, tags, publish_datetimes)
-                #app = XiaoHongShuVideo(title, file, tags, publish_datetimes, cookie)
+            app = xhsVideoUploader(cookie, file_type, file, title, text, tags, publish_datetimes)
             asyncio.run(app.main(), debug=False)
 
 

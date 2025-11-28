@@ -5,8 +5,8 @@ xhs平台视频上传核心实现
 import os
 import asyncio
 from datetime import datetime
-from playwright.async_api import Playwright, async_playwright
 from conf import LOCAL_CHROME_PATH, LOCAL_CHROME_HEADLESS
+from playwright.async_api import Playwright, async_playwright
 from utils.base_social_media import set_init_script
 from utils.files_times import get_absolute_path
 from utils.log import xhs_logger as logger
@@ -14,25 +14,28 @@ from utils.log import xhs_logger as logger
 
 class xhsVideoUploader(object):
     """
-    小红书视频上传器类参数说明：
+    小红书图文/视频通用文件上传器类参数说明：
     account_file: 账号cookie文件路径
-    file_path: 视频文件路径
-    title: 视频标题
-    text: 视频正文描述
-    tags: 视频标签，多个标签用逗号隔开
+    file_type: 文件类型，1为图文，2为视频
+    file_path: 文件路径
+    title: 文件标题
+    text: 文件正文描述
+    tags: 文件标签，多个标签用逗号隔开
     publish_date: 发布时间，格式为YYYY-MM-DD HH:MM:SS
     """
     
-    def __init__(self, account_file, file_path, title, text, tags, publish_date):
-        self.title = title
+    def __init__(self, account_file, file_type, file_path, title, text, tags, publish_date):
+        self.account_file = account_file
+        self.file_type = file_type
         self.file_path = file_path
+        self.title = title
+        self.text = text
         self.tags = tags
         self.publish_date = publish_date
-        self.account_file = account_file
         self.local_executable_path = LOCAL_CHROME_PATH
         self.headless = LOCAL_CHROME_HEADLESS
         self.locator_base = None
-        self.text = text
+        
 
         # URL constants
         # 平台名称
@@ -159,7 +162,11 @@ class xhsVideoUploader(object):
 
         # step3.创建新页面，导航到上传页面，明确指定等待domcontentloaded状态
         page = await context.new_page()
-        await page.goto(self.creator_video_url, wait_until='domcontentloaded', timeout=self.page_load_timeout)
+        # 根据文件类型选择上传页面
+        if self.file_type == 1:
+            await page.goto(self.creator_image_url, wait_until='domcontentloaded', timeout=self.page_load_timeout)
+        else:
+            await page.goto(self.creator_video_url, wait_until='domcontentloaded', timeout=self.page_load_timeout)
         logger.info(f"step3: {self.platform_name}页面加载完成")
         
         # step4.选择基础定位器
