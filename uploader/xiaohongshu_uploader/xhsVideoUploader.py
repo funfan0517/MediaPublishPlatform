@@ -27,9 +27,12 @@ class xhsVideoUploader(object):
         self.headless = LOCAL_CHROME_HEADLESS
         self.locator_base = None
         self.text = text
-        
-        # URL constants
+
+        #constants
         self.platform_name = "xhs"
+        self.publish_status = False
+
+        # URL constants
         self.creator_url = "https://creator.xiaohongshu.com/publish/publish?from=homepage&target=video&openFilePicker=true"
         self.personal_url = "https://creator.xiaohongshu.com/new/home"
         self.login_url = "https://creator.xiaohongshu.com/login"
@@ -99,7 +102,7 @@ class xhsVideoUploader(object):
             await self.upload(playwright)
 
         logger.info(f"{self.platform_name}视频上传成功: {self.title}")
-        return True
+        return self.publish_status
 
     async def upload(self, playwright: Playwright) -> None:
         """
@@ -162,7 +165,7 @@ class xhsVideoUploader(object):
         # step12.关闭所有页面和浏览器上下文
         await context.close()
         await browser.close()
-        logger.info(f"step12：{self.platform_name}浏览器实例已关闭")
+        logger.info(f"step12：{self.platform_name}浏览器窗口已关闭")
 
     async def choose_base_locator(self, page):
         """
@@ -347,7 +350,7 @@ class xhsVideoUploader(object):
         
         # 上传按钮选择器列表
         
-        while attempt < max_attempts and not publish_success:
+        while attempt < max_attempts and not self.publish_status:
             attempt += 1
             try:
                 # 步骤1: 查找并点击发布按钮
@@ -363,7 +366,7 @@ class xhsVideoUploader(object):
 
                 if upload_button:
                     await upload_button.wait_for(state='visible', timeout=self.timeout_30s)
-                    publish_success = True
+                    self.publish_status = True
                     break
             except Exception:
                 # 等待后重试
@@ -371,11 +374,11 @@ class xhsVideoUploader(object):
                 await asyncio.sleep(min(attempt * 2, self.max_retry_delay))
         
         # 最终状态检查
-        if publish_success:
+        if self.publish_status:
             logger.info("视频发布完成")
         else:
             logger.error(f"视频发布失败，已尝试 {max_attempts} 次")
-        return publish_success
+        return self.publish_status
 
 
     async def platform_setup(self, handle=False):
