@@ -520,14 +520,26 @@ def login():
 
 @app.route('/postVideo', methods=['POST'])
 def postVideo():
-    # 获取JSON数据
-    data = request.get_json()
+    #参数说明：
+    # fileList: 文件列表，每个元素为一个字典，包含文件路径和文件名
+    # accountList: 账号列表，每个元素为一个字典，包含账号信息
+    # type: 发布平台类型，1-小红书 2-视频号 3-抖音 4-快手 
+    # title: 视频标题
+    # text: 视频描述
+    # tags: 视频标签，逗号分隔
+    # category: 视频分类，0-无分类 1-美食 2-日常 3-旅行 4-娱乐 5-教育 6-其他
+    # enableTimer: 是否启用定时发布，0-否 1-是
+    # videosPerDay: 每天发布视频数量
+    # dailyTimes: 每天发布时间，逗号分隔，格式为HH:MM
+    # startDays: 开始发布时间，距离当前时间的天数，负数表示之前的时间
 
-    # 从JSON数据中提取fileList和accountList
+    # 获取JSON数据的POST请求体
+    data = request.get_json()
     file_list = data.get('fileList', [])
     account_list = data.get('accountList', [])
     type = data.get('type')
     title = data.get('title')
+    text = data.get('text')
     tags = data.get('tags')
     category = data.get('category')
     enableTimer = data.get('enableTimer')
@@ -537,6 +549,7 @@ def postVideo():
     productTitle = data.get('productTitle', '')
     thumbnail_path = data.get('thumbnail', '')
     is_draft = data.get('isDraft', False)  # 新增参数：是否保存为草稿
+    file_type = data.get('fileType', 1)  # 新增参数：文件类型，默认值为1：1-视频 2-图片
 
     videos_per_day = data.get('videosPerDay')
     daily_times = data.get('dailyTimes')
@@ -547,7 +560,7 @@ def postVideo():
     match type:
         case 1:
             post_video_xhs(title, file_list, tags, account_list, category, enableTimer, videos_per_day, daily_times,
-                               start_days)
+                               start_days, file_type, text)
         case 2:
             post_video_tencent(title, file_list, tags, account_list, category, enableTimer, videos_per_day, daily_times,
                                start_days, is_draft)

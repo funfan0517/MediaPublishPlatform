@@ -1,19 +1,17 @@
 import asyncio
-import os
 import logging
-from datetime import datetime
 from pathlib import Path
-
 from conf import BASE_DIR
 from uploader.douyin_uploader.main import DouYinVideo
 from uploader.ks_uploader.main import KSVideo
-from uploader.tk_uploader.main_chrome import tiktok_setup, TiktokVideo
+from uploader.tk_uploader.main_chrome import TiktokVideo
 from uploader.tencent_uploader.main import TencentVideo
 from uploader.xiaohongshu_uploader.main import XiaoHongShuVideo
-from uploader.ins_uploader.main_chrome import instagram_setup, InstagramVideo
+from uploader.xiaohongshu_uploader.xhsImageUploader import xhsImageUploader
+from uploader.ins_uploader.main_chrome import InstagramVideo
 from uploader.fb_uploader.main_chrome import FacebookVideo
 from utils.constant import TencentZoneTypes
-from utils.files_times import generate_schedule_time_next_day, get_title_and_hashtags
+from utils.files_times import generate_schedule_time_next_day
 
 logger = logging.getLogger(__name__)
 
@@ -76,7 +74,7 @@ def post_video_ks(title,files,tags,account_file,category=TencentZoneTypes.LIFEST
             app = KSVideo(title, str(file), tags, publish_datetimes[index], cookie)
             asyncio.run(app.main(), debug=False)
 
-def post_video_xhs(title,files,tags,account_file,category=TencentZoneTypes.LIFESTYLE.value,enableTimer=False,videos_per_day = 1, daily_times=None,start_days = 0):
+def post_video_xhs(title,files,tags,account_file,category=TencentZoneTypes.LIFESTYLE.value,enableTimer=False,videos_per_day = 1, daily_times=None,start_days = 0,file_type=1,text=''):
     # 生成文件的完整路径
     account_file = [Path(BASE_DIR / "cookiesFile" / file) for file in account_file]
     files = [Path(BASE_DIR / "videoFile" / file) for file in files]
@@ -91,7 +89,11 @@ def post_video_xhs(title,files,tags,account_file,category=TencentZoneTypes.LIFES
             print(f"视频文件名：{file}")
             print(f"标题：{title}")
             print(f"Hashtag：{tags}")
-            app = XiaoHongShuVideo(title, file, tags, publish_datetimes, cookie)
+            print(f"file_type：{file_type}")
+            if file_type == 2:
+                app = xhsImageUploader(cookie, file, title, text, tags, publish_datetimes)
+            else:
+                app = XiaoHongShuVideo(title, file, tags, publish_datetimes, cookie)
             asyncio.run(app.main(), debug=False)
 
 
