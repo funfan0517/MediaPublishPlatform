@@ -75,35 +75,64 @@ def post_video_ks(title,files,tags,account_file,category=TencentZoneTypes.LIFEST
             app = KSVideo(title, str(file), tags, publish_datetimes[index], cookie)
             asyncio.run(app.main(), debug=False)
 
-def post_video_xhs(title,files,tags,account_file,category=TencentZoneTypes.LIFESTYLE.value,enableTimer=False,videos_per_day = 1, daily_times=None,start_days = 0,file_type=2,text=''):
-    # 生成文件的完整路径
-    account_file = [Path(BASE_DIR / "cookiesFile" / file) for file in account_file]
-    files = [Path(BASE_DIR / "videoFile" / file) for file in files]
-    file_num = len(files)
-    if enableTimer:
-        publish_datetimes = generate_schedule_time_next_day(file_num, videos_per_day, daily_times,start_days)
-    else:
-        publish_datetimes = 0
-    for index, file in enumerate(files):
-        for cookie in account_file:
-            # 打印视频文件名、标题和 hashtag
-            print(f"文件名：{file}")
-            #根据文件名后缀判断文件类型
-            #.jpg,.jpeg,.png,.webp 为图片文件
-            if file.suffix == '.jpg' or file.suffix == '.jpeg' or file.suffix == '.png' or file.suffix == '.webp':
-                file_type = 1
-            #.mp4,.mov,.flv,.f4v,.mkv,.rm,.rmvb,.m4v,.mpg,.mpeg,.ts 为视频文件
-            elif file.suffix == '.mp4' or file.suffix == '.mov' or file.suffix == '.flv' or file.suffix == '.f4v' or file.suffix == '.mkv' or file.suffix == '.rm' or file.suffix == '.rmvb' or file.suffix == '.m4v' or file.suffix == '.mpg' or file.suffix == '.mpeg' or file.suffix == '.ts':
-                file_type = 2
-            else:
-                logger.error(f"该文件类型暂不支持：{file}")
-                continue
-            print(f"文件类型：{file_type}")
-            print(f"标题：{title}")
-            #print(f"正文描述：{text}")
-            print(f"标签：{tags}")
-            app = xhsVideoUploader(cookie, file_type, file, title, text, tags, publish_datetimes)
-            asyncio.run(app.main(), debug=False)
+def post_video_xhs(account_file, file_type, files, title, text,tags,enableTimer=False, videos_per_day=1, daily_times=None, start_days=0):
+    """
+    发布图文/视频到小红书平台
+    参数:
+        account_file: 账号文件列表
+        file_type: 文件类型，1-图文 2-视频
+        files: 文件列表
+        title: 视频标题
+        text: 视频正文描述
+        tags: 视频标签
+        enableTimer: 是否开启定时发布
+        videos_per_day: 每天发布视频数量
+        daily_times: 每天发布时间列表
+        start_days: 开始发布时间偏移天数
+    """
+
+    try:
+        # 生成文件的完整路径
+        account_file = [Path(BASE_DIR / "cookiesFile" / file) for file in account_file]
+        files = [Path(BASE_DIR / "videoFile" / file) for file in files]
+        file_num = len(files)
+
+        if enableTimer:
+            publish_datetimes = generate_schedule_time_next_day(file_num, videos_per_day,daily_times, start_days)
+        else:
+            publish_datetimes = 0
+
+        for index, file in enumerate(files):
+            for cookie in account_file:
+                try:
+                    # 打印视频文件名、标题和 hashtag
+                    print(f"文件名：{file}")
+                    # 根据文件名后缀判断文件类型
+                    # .jpg,.jpeg,.png,.webp 为图片文件
+                    if file.suffix in ['.jpg', '.jpeg', '.png', '.webp']:
+                        file_type = 1
+                    # .mp4,.mov,.flv,.f4v,.mkv,.rm,.rmvb,.m4v,.mpg,.mpeg,.ts 为视频文件
+                    elif file.suffix in ['.mp4', '.mov', '.flv', '.f4v', '.mkv',
+                                         '.rm', '.rmvb', '.m4v', '.mpg', '.mpeg', '.ts']:
+                        file_type = 2
+                    else:
+                        logger.error(f"该文件类型暂不支持：{file}")
+                        continue
+
+                    print(f"文件类型：{file_type}")
+                    print(f"标题：{title}")
+                    # print(f"正文描述：{text}")
+                    print(f"标签：{tags}")
+
+                    app = xhsVideoUploader(cookie, file_type, file, title, text, tags, publish_datetimes)
+                    asyncio.run(app.main(), debug=False)
+                except Exception as e:
+                    logger.error(f"TikTok视频发布失败: {str(e)}")
+                    # 继续尝试其他账号或文件，不中断整个流程
+    except Exception as e:
+        logger.error(f"文件发布过程中发生异常: {str(e)}")
+        # 抛出异常，让调用方处理
+        raise
 
 
 
