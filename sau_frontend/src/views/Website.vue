@@ -8,41 +8,89 @@
       </template>
       
       <div class="website-content">
-        <el-descriptions :column="1" border>
+        <!-- <el-descriptions :column="1" border>
           <el-descriptions-item label="功能说明">
             网站管理模块用于配置和管理各个平台的网站设置。
           </el-descriptions-item>
         </el-descriptions>
         
-        <el-divider>平台配置</el-divider>
+        <el-divider>平台配置</el-divider> -->
         
-        <el-table :data="websiteData" style="width: 100%">
-          <el-table-column prop="platform" label="平台" width="120" />
-          <el-table-column prop="url" label="网站地址" />
-          <el-table-column prop="status" label="状态">
-            <template #default="scope">
-              <el-tag :type="scope.row.status === 'active' ? 'success' : 'danger'">
-                {{ scope.row.status === 'active' ? '活跃' : '未激活' }}
-              </el-tag>
-            </template>
-          </el-table-column>
-          <el-table-column label="操作" width="150" fixed="right">
-            <template #default="scope">
-              <el-button size="small" type="primary" @click="editWebsite(scope.row)">编辑</el-button>
-              <el-button size="small" :type="scope.row.status === 'active' ? 'danger' : 'success'" 
-                @click="toggleStatus(scope.row)">
-                {{ scope.row.status === 'active' ? '停用' : '启用' }}
+        <!-- 使用通用table组件 -->
+        <Table
+          :columns="tableColumns"
+          :data="websiteData"
+          :model-value="pagination"
+          :total="total"
+          :show-index="true"
+          @clear="handleSearch"
+        >
+          <!-- 状态列自定义插槽 -->
+          <template #status="{ data }">
+            <el-tag :type="data.status === 'active' ? 'success' : 'danger'">
+              {{ data.status === 'active' ? '活跃' : '未激活' }}
+            </el-tag>
+          </template>
+          
+          <!-- 操作列自定义插槽 -->
+          <template #operation="{ data }">
+            <div class="action-buttons">
+              <el-button size="small" type="primary" @click="editWebsite(data)">编辑</el-button>
+              <el-button size="small" :type="data.status === 'active' ? 'danger' : 'success'" 
+                @click="toggleStatus(data)">
+                {{ data.status === 'active' ? '停用' : '启用' }}
               </el-button>
-            </template>
-          </el-table-column>
-        </el-table>
+            </div>
+          </template>
+        </Table>
       </div>
     </el-card>
   </div>
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { ref, reactive } from 'vue'
+import Table from '@/components/table.vue'
+
+// 分页配置
+const pagination = reactive({
+  pageNum: 1,
+  pageSize: 10
+})
+
+// 总数
+const total = ref(7)
+
+// 表格列配置
+const tableColumns = ref([
+  {
+    key: 'platform',
+    title: '平台',
+    // width: 120,
+    align: 'center'
+  },
+  {
+    key: 'url',
+    title: '网站地址',
+    // width: 100,
+    align: 'center'
+  },
+  {
+    key: 'status',
+    title: '状态',
+    // width: 100,
+    align: 'center',
+    slots: 'status'  // 使用自定义插槽
+  },
+  {
+    key: 'operation',
+    title: '操作',
+    // width: 150,
+    align: 'center',
+    fixed: 'right',
+    slots: 'operation'  // 使用自定义插槽
+  }
+])
 
 // 网站数据
 const websiteData = ref([
@@ -83,6 +131,12 @@ const websiteData = ref([
   }
 ])
 
+// 搜索/刷新数据
+const handleSearch = (params) => {
+  console.log('搜索参数:', params)
+  // 这里可以添加实际的搜索逻辑
+}
+
 // 编辑网站配置
 const editWebsite = (row) => {
   console.log('编辑网站配置:', row)
@@ -111,5 +165,18 @@ const toggleStatus = (row) => {
 
 .website-content {
   margin-top: 20px;
+}
+
+/* 操作按钮横向排列 */
+.action-buttons {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  justify-content: center;
+}
+
+/* 确保按钮在小屏幕上也能正常显示 */
+.action-buttons .el-button {
+  flex-shrink: 0;
 }
 </style>
