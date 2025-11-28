@@ -28,66 +28,85 @@ class xhsVideoUploader(object):
         self.locator_base = None
         self.text = text
 
-        #constants
-        self.platform_name = "xhs"
-        self.publish_status = False
-
         # URL constants
+        self.platform_name = "xhs"
         self.creator_url = "https://creator.xiaohongshu.com/publish/publish?from=homepage&target=video&openFilePicker=true"
         self.personal_url = "https://creator.xiaohongshu.com/new/home"
         self.login_url = "https://creator.xiaohongshu.com/login"
         
         # Selector lists
+        # 上传按钮选择器
         self.upload_button_selectors = [
             'input.upload-input[type="file"]'
         ]
+        # 发布按钮选择器
         self.publish_button_selectors = [
             'div.d-button-content span.d-text:has-text("发布")'
         ]
+        # 错误信息选择器
         self.error_selectors = [
             'div:has-text("error"):visible',
             'div:has-text("Error"):visible',
             'div[class*="error"]:visible'
         ]
+        # 标题编辑器输入框选择器
         self.editor_button_locators = [
-            # 标题输入框选择器
             'div.d-input.\--color-text-title.\--color-bg-fill input.d-text[type="text"]'
         ]
+        # 正文编辑器输入框选择器
         self.textbox_selectors = [
-            # 正文输入框选择器
             'div.tiptap.ProseMirror[contenteditable="true"][role="textbox"]'
         ]
+        # 发布时间选择器
         self.schedule_button_selectors = [
             "//span[text()='Schedule']",
             "//span[text()='定时']"
         ]
-        self.file_input_selectors = ['input[type="file"]']
         
-        # Timeout and retry constants
-        self.timeout_30s = 30000
-        self.timeout_60s = 60000
-        self.max_publish_attempts = 3
-        self.upload_check_interval = 2
+        
+        # constants
+        # 视频/图文发布状态
+        self.publish_status = False
+        #按钮等待可见超时时间
+        self.button_visible_timeout = 30000
+        #网页加载超时时间
+        self.page_load_timeout = 60000
+        # 检查间隔时间
+        self.check_interval = 2
+        # 500ms等待超时时间
         self.wait_timeout_500ms = 500
-        self.wait_timeout_300ms = 300
-        self.sleep_2s = 2
+        # 登录等待超时时间
         self.login_wait_timeout = 10000
+        # 最大发布尝试次数
+        self.max_publish_attempts = 3
+        # 最大重试延迟时间
         self.max_retry_delay = 10
+        # 日期格式
         self.date_format = '%Y-%m-%d'
+        # 时间格式
         self.time_format = '%H:%M'
-        self.file_input_selector = "//input[@type='file']"
-        self.browser_lang = 'en-US'
-        
+        # 系统文件输入选择器
+        self.file_input_selector = ['input[type="file"]']
+
         # Browser launch options
+        # 浏览器语言
+        self.browser_lang = 'en-US'
+        # 慢速模式，模拟人类操作，增加稳定性
+        self.slow_mo = 50
         self.browser_args = [
+            # 禁用沙盒模式，允许在容器中运行
             '--no-sandbox',
+            # 禁用/共享内存使用，解决资源冲突问题
             '--disable-dev-shm-usage',
+            # 禁用GPU加速，防止渲染问题
             '--disable-gpu',
+            # 忽略证书错误，允许加载不安全的页面
             '--ignore-certificate-errors',
+            # 启动时最大化窗口，避免元素遮挡
             '--start-maximized',
+            # 禁用自动化控制特征，防止被检测为自动化工具
             '--disable-blink-features=AutomationControlled'
         ]
-        self.slow_mo = 50
 
     async def main(self):
         """
@@ -125,7 +144,7 @@ class xhsVideoUploader(object):
 
         # step3.创建新页面，导航到上传页面，明确指定等待domcontentloaded状态
         page = await context.new_page()
-        await page.goto(self.creator_url, wait_until='domcontentloaded', timeout=self.timeout_60s)
+        await page.goto(self.creator_url, wait_until='domcontentloaded', timeout=self.page_load_timeout)
         logger.info(f"step3: {self.platform_name}页面加载完成")
         
         # step4.选择基础定位器
@@ -160,7 +179,7 @@ class xhsVideoUploader(object):
         await context.storage_state(path=f"{self.account_file}")  
         logger.info(f"step11：{self.platform_name}cookie已更新")
 
-        await asyncio.sleep(self.sleep_2s)  # close delay for look the video status
+        await asyncio.sleep(self.check_interval)  # close delay for look the video status
         
         # step12.关闭所有页面和浏览器上下文
         await context.close()
@@ -187,7 +206,7 @@ class xhsVideoUploader(object):
             count = await self.locator_base.locator(selector).count()
             if count > 0:
                 # 异步等待元素可交互（避免元素未加载完成）
-                await self.locator_base.locator(selector).wait_for(state="visible", timeout=self.timeout_30s)
+                await self.locator_base.locator(selector).wait_for(state="visible", timeout=self.button_visible_timeout)
                 # logger.info(f"找到按钮定位器: {selector}, 是否可见: {await self.locator_base.locator(selector).is_visible()}")
                 # 返回找到的按钮定位器
                 return self.locator_base.locator(selector)
@@ -203,12 +222,12 @@ class xhsVideoUploader(object):
         """
         try:
             # 使用find_button方法查找上传按钮，支持中文和英文界面
-            await asyncio.sleep(self.sleep_2s)
+            await asyncio.sleep(self.check_interval)
             upload_button = await self.find_button(self.upload_button_selectors)
             if not upload_button:
                 raise Exception("未找到上传视频按钮")
             logger.info("  [-] 将点击上传视频按钮")
-            await upload_button.wait_for(state='visible', timeout=self.timeout_30s)
+            await upload_button.wait_for(state='visible', timeout=self.button_visible_timeout)
             
             # 上传按钮，需要点击触发系统文件选择器
             async with page.expect_file_chooser() as fc_info:
@@ -236,7 +255,7 @@ class xhsVideoUploader(object):
                     break
                 else:
                     logger.info("  [-] video uploading...")
-                    await asyncio.sleep(self.upload_check_interval)
+                    await asyncio.sleep(self.check_interval)
                     # 检查是否有错误需要重试，使用中文和英文选择器
                     error_element = await self.find_button(self.error_selectors)
                     if error_element:
@@ -244,7 +263,7 @@ class xhsVideoUploader(object):
                         await self.handle_upload_error(page)
             except Exception as e:
                 logger.info(f"  [-] video uploading... Error: {str(e)}")
-                await asyncio.sleep(self.upload_check_interval)
+                await asyncio.sleep(self.check_interval)
 
     async def handle_upload_error(self, page):
         """
@@ -254,7 +273,7 @@ class xhsVideoUploader(object):
         logger.info("video upload error retrying.")
         try:
             # 使用find_button方法查找文件上传按钮
-            file_input_button = await self.find_button(self.file_input_selectors)
+            file_input_button = await self.find_button(self.file_input_selector)
             if file_input_button:
                 await file_input_button.set_input_files(self.file_path)
         except Exception as e:
@@ -309,7 +328,7 @@ class xhsVideoUploader(object):
                     logger.info("Setting the %s tag" % index)
                     await page.keyboard.insert_text(f"#{tag} ")
                     # 等待300毫秒
-                    await page.wait_for_timeout(self.wait_timeout_300ms)
+                    await page.wait_for_timeout(self.wait_timeout_500ms)
         except Exception as e:
             logger.error(f"Failed to add title, text and tags: {str(e)}")
 
@@ -365,7 +384,7 @@ class xhsVideoUploader(object):
                 logger.info(f"发布尝试 {attempt}，上传按钮可见状态: {await upload_button.is_visible()}")
 
                 if upload_button:
-                    await upload_button.wait_for(state='visible', timeout=self.timeout_30s)
+                    await upload_button.wait_for(state='visible', timeout=self.button_visible_timeout)
                     self.publish_status = True
                     break
             except Exception:
@@ -390,7 +409,7 @@ class xhsVideoUploader(object):
             if not handle:
                 return False
             logger.info("Cookie文件不存在，需要获取新的Cookie")
-            await self.get_platform_cookie(account_file, self.local_executable_path, self.timeout_60s, self.login_url, self.login_wait_timeout, self.browser_lang)
+            await self.get_platform_cookie(account_file, self.local_executable_path, self.page_load_timeout, self.login_url, self.login_wait_timeout, self.browser_lang)
         return True
 
 
@@ -406,7 +425,7 @@ class xhsVideoUploader(object):
             # 创建一个新的页面
             page = await context.new_page()
             # 访问平台个人中心页面url验证cookie，明确指定等待domcontentloaded状态
-            await page.goto(self.personal_url, wait_until='domcontentloaded', timeout=self.timeout_60s)
+            await page.goto(self.personal_url, wait_until='domcontentloaded', timeout=self.page_load_timeout)
             logger.info("平台个人中心页面DOM加载完成")
             
             try:
