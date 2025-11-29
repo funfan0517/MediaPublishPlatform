@@ -34,25 +34,6 @@ def post_file(platform, account_file, file_type, files, title, text,tags,enableT
         for index, file in enumerate(files):
             for cookie in account_file:
                 try:
-                    # 打印视频文件名、标题和 hashtag
-                    print(f"{platform}文件名：{file}")
-                    # 根据文件名后缀判断文件类型
-                    # .jpg,.jpeg,.png,.webp 为图片文件
-                    if file.suffix in ['.jpg', '.jpeg', '.png', '.webp']:
-                        file_type = 1
-                    # .mp4,.mov,.flv,.f4v,.mkv,.rm,.rmvb,.m4v,.mpg,.mpeg,.ts 为视频文件
-                    elif file.suffix in ['.mp4', '.mov', '.flv', '.f4v', '.mkv',
-                                         '.rm', '.rmvb', '.m4v', '.mpg', '.mpeg', '.ts']:
-                        file_type = 2
-                    else:
-                        logger.error(f"该文件类型暂不支持：{file}")
-                        continue
-
-                    print(f"{platform}文件类型：{file_type}")
-                    print(f"{platform}标题：{title}")
-                    # print(f"正文描述：{text}")
-                    print(f"{platform}标签：{tags}")
-
                     app = BaseFileUploader(platform, cookie, file_type, file, title, text, tags, publish_datetimes)
                     asyncio.run(app.main(), debug=False)
                     #是否成功发布

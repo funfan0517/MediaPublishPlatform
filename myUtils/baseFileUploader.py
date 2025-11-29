@@ -289,12 +289,29 @@ class BaseFileUploader(object):
         """
         主入口函数
         """
-        # 验证平台cookie是否有效(可选：如果已登录，可跳过验证)
+        #1.打印本次发布的文件信息
+        self.logger.info(f"{self.platform_name}将上传文件：{self.file_path}")
+        # 根据文件名后缀判断文件类型
+        # .jpg,.jpeg,.png,.webp 为图片文件
+        if self.file_path.suffix in ['.jpg', '.jpeg', '.png', '.webp']:
+            self.file_type = 1
+        # .mp4,.mov,.flv,.f4v,.mkv,.rm,.rmvb,.m4v,.mpg,.mpeg,.ts 为视频文件
+        elif self.file_path.suffix in ['.mp4', '.mov', '.flv', '.f4v', '.mkv',
+                             '.rm', '.rmvb', '.m4v', '.mpg', '.mpeg', '.ts']:
+            self.file_type = 2
+        else:
+            self.logger.error(f"{self.platform_name}该文件类型暂不支持：{self.file_path.name}")
+        self.logger.info(f"{self.platform_name} 文件类型：{self.file_type}")
+        self.logger.info(f"{self.platform_name} 标题：{self.title}")
+        #self.logger.info(f"{self.platform_name} 正文描述：{self.text}")
+        self.logger.info(f"{self.platform_name} 标签：{self.tags}")
+
+        # 2.验证平台cookie是否有效(可选：如果已登录，可跳过验证)
         if not self.skip_cookie_verify:
             if not await self.platform_setup(handle=True):
                 raise Exception(f"{self.platform_name} Cookie验证失败")
 
-        # 执行平台上传视频
+        # 3.执行平台上传视频
         async with async_playwright() as playwright:
             await self.upload(playwright)
 
