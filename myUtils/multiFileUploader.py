@@ -1,7 +1,7 @@
 import asyncio
 from pathlib import Path
 from conf import BASE_DIR
-from myUtils.baseFileUploader import BaseFileUploader
+from myUtils.baseFileUploader import BaseFileUploader, run_upload
 from utils.files_times import generate_schedule_time_next_day
 
 def post_file(platform, account_file, file_type, files, title, text,tags,enableTimer=False, videos_per_day=1, daily_times=None, start_days=0):
@@ -35,21 +35,24 @@ def post_file(platform, account_file, file_type, files, title, text,tags,enableT
         for index, file in enumerate(files):
             for cookie in account_file:
                 try:
-                    app = BaseFileUploader(platform, cookie, file_type, file, title, text, tags, publish_datetimes)
-                    asyncio.run(app.main(), debug=False)
-                    #是否成功发布
-                    if app.publish_success:
-                        app.logger.info(f"{platform}文件{file.name}发布成功")
+                    # 使用独立的run_upload函数来执行上传
+                    publish_result = asyncio.run(run_upload(platform, cookie, file_type, file, title, text, tags, publish_datetimes))
+                    
+                    # 是否成功发布
+                    if publish_result:
+                        print(f"{platform}文件{file.name}发布成功")
                     else:
-                        app.logger.error(f"{platform}文件{file.name}发布失败")
-                    #任务进度
-                    app.logger.info(f"{platform}已发布{index+1}/{file_num}个文件")
-                    #全部发布完毕后
+                        print(f"{platform}文件{file.name}发布失败")
+                    
+                    # 任务进度
+                    print(f"{platform}已发布{index+1}/{file_num}个文件")
+                    
+                    # 全部发布完毕后
                     if index+1 == file_num:
-                        app.logger.info(f"{platform}所有文件发布完成")
+                        print(f"{platform}所有文件发布完成")
                 except Exception as e:
-                    app.logger.error(f"{platform}文件{file.name}发布失败: {str(e)}")
+                    print(f"{platform}文件{file.name}发布失败: {str(e)}")
                     # 继续尝试其他账号或文件，不中断整个流程
     except Exception as e:
-        app.logger.error(f"{platform}文件{file.name}发布过程中发生异常: {str(e)}")
-        raise
+        print(f"{platform}文件发布过程中发生异常: {str(e)}")
+        return False

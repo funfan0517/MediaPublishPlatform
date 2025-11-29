@@ -343,17 +343,21 @@ class BaseFileUploader(object):
         self.upload_button_selectors = self.config["selectors"]["upload_button"]
         # 发布按钮选择器
         self.publish_button_selectors = self.config["selectors"]["publish_button"]
-        # 错误信息选择器
-        self.error_selectors = self.config["selectors"]["error"]
         # 标题编辑器输入框选择器
         self.editor_button_locators = self.config["selectors"]["title_editor"]
         # 正文编辑器输入框选择器
-        self.textbox_selectors = self.config["selectors"]["textbox"]
+        self.textbox_selectors = self.config["selectors"]["textbox_selectors"]
         # 发布时间选择器
         self.schedule_button_selectors = self.config["selectors"]["schedule_button"]
         
         
         # constants
+        # 错误信息选择器
+        self.error_selectors = [
+            'div:has-text("error"):visible',
+            'div:has-text("Error"):visible',
+            'div[class*="error"]:visible'
+        ]
         # 日志记录器
         self.logger = create_logger (self.platform_name, f'logs/{self.platform_name}.log')
         # 是否跳过验证cookie有效性
