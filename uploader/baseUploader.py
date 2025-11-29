@@ -1,20 +1,49 @@
 # -*- coding: utf-8 -*-
 """
-xhs平台视频上传核心实现
+通用多平台视频上传核心实现
 """
 import os
 import asyncio
 from datetime import datetime
-from conf import LOCAL_CHROME_PATH, LOCAL_CHROME_HEADLESS
 from playwright.async_api import Playwright, async_playwright
+from conf import LOCAL_CHROME_PATH, LOCAL_CHROME_HEADLESS
 from utils.base_social_media import set_init_script
 from utils.files_times import get_absolute_path
-from utils.log import create_logger
+from utils.log import get_logger
+
+# 平台配置字典
+PLATFORM_CONFIGS = {
+    "facebook": {
+        "name": "Facebook",
+        "upload_url": "https://www.facebook.com/",
+        "personal_url": "https://www.facebook.com/profile.php",
+        "login_url": "https://www.facebook.com/",
+        "selectors": {
+            "upload_button": ['div[aria-label="照片/视频"]', 'div[aria-label="Photo/Video"]'],
+            "publish_button": ['//span[text()="发帖"]', '//span[text()="Post"]', '//span[text()="Schedule"]', '//span[text()="发布"]'],
+            "title_editor": [
+                '[contenteditable="true"][role="textbox"][data-lexical-editor="true"]',
+                '[aria-placeholder*="分享你的新鲜事"][contenteditable="true"]',
+                '[aria-label="Add a description"]',
+                '[aria-label="Write something..."]'
+            ],
+            "thumbnail_button": ["//span[contains(text(), 'Add')]", "//span[contains(text(), '添加')]"],
+            "schedule_button": ["//span[text()='Schedule']", "//span[text()='定时']"],
+            "date_input": '[aria-label="Date"]',
+            "time_input": '[aria-label="Time"]',
+        },
+        "features": {
+            "thumbnail": True,
+            "schedule": True,
+            "tags": True
+        }
+    }
+}
 
 
-class xhsVideoUploader(object):
+class BaseVideoUploader(object):
     """
-    小红书图文/视频通用文件上传器类参数说明：
+    通用视频上传器基类参数说明：
     account_file: 账号cookie文件路径
     file_type: 文件类型，1为图文，2为视频
     file_path: 文件路径
@@ -24,7 +53,8 @@ class xhsVideoUploader(object):
     publish_date: 发布时间，格式为YYYY-MM-DD HH:MM:SS
     """
     
-    def __init__(self, account_file, file_type, file_path, title, text, tags, publish_date):
+    def __init__(self, platform, account_file, file_type, file_path, title, text, tags, publish_date):
+        self.platform = platform
         self.account_file = account_file
         self.file_type = file_type
         self.file_path = file_path
@@ -36,6 +66,12 @@ class xhsVideoUploader(object):
         self.headless = LOCAL_CHROME_HEADLESS
         self.locator_base = None
         
+        # 获取平台配置
+        self.config = PLATFORM_CONFIGS.get(self.platform)
+        if not self.config:
+            raise ValueError(f"不支持的平台: {self.platform}")
+        # 获取平台特定的日志器
+        self.logger = get_logger(f"{self.platform}_uploader")
 
         # URL constants
         # 平台名称
@@ -81,7 +117,7 @@ class xhsVideoUploader(object):
         
         # constants
         # 日志记录器
-        self.logger= create_logger (self.platform_name, f'logs/{self.platform_name}.log')
+        self.logger = create_logger (self.platform_name, f'logs/{self.platform_name}.log')
         # 是否跳过验证cookie有效性
         self.skip_cookie_verify = True
         # 视频/图文发布状态
@@ -520,3 +556,72 @@ class xhsVideoUploader(object):
             return browser, context
         else:
             raise FileNotFoundError(f"Cookie文件不存在: {account_file}")
+
+
+# 特定平台上传器类（用于向后兼容和特殊处理）
+class FacebookVideo(BaseVideoUploader):
+    """Facebook视频上传器"""
+    def __init__(self, title, file_path, tags, publish_date, account_file, thumbnail_path=None):
+        super().__init__("facebook", title, file_path, tags, publish_date, account_file, thumbnail_path)
+
+class YouTubeVideo(BaseVideoUploader):
+    """YouTube视频上传器"""
+    def __init__(self, title, file_path, tags, publish_date, account_file, thumbnail_path=None):
+        super().__init__("youtube", title, file_path, tags, publish_date, account_file, thumbnail_path)
+
+class TikTokVideo(BaseVideoUploader):
+    """TikTok视频上传器"""
+    def __init__(self, title, file_path, tags, publish_date, account_file, thumbnail_path=None):
+        super().__init__("tiktok", title, file_path, tags, publish_date, account_file, thumbnail_path)
+
+
+# 工厂函数和便捷函数
+async def run_upload(platform, title, file_path, tags, publish_date, account_file, **kwargs):
+    """
+    运行上传任务
+    
+    Args:
+        platform (str): 平台名称 (facebook, youtube, tiktok等)
+        title (str): 视频标题
+        file_path (str): 视频文件路径
+        tags (str): 标签
+        publish_date (int): 发布时间戳
+        account_file (str): Cookie文件路径
+        **kwargs: 额外参数
+    """
+    uploader = BaseVideoUploader(platform, title, file_path, tags, publish_date, account_file, **kwargs)
+    return await uploader.main()
+
+# 特定平台的便捷函数
+async def upload_to_facebook(title, file_path, tags, publish_date, account_file, **kwargs):
+    """上传到Facebook的便捷函数"""
+    return await run_upload("facebook", title, file_path, tags, publish_date, account_file, **kwargs)
+
+async def upload_to_youtube(title, file_path, tags, publish_date, account_file, **kwargs):
+    """上传到YouTube的便捷函数"""
+    return await run_upload("youtube", title, file_path, tags, publish_date, account_file, **kwargs)
+
+async def upload_to_tiktok(title, file_path, tags, publish_date, account_file, **kwargs):
+    """上传到TikTok的便捷函数"""
+    return await run_upload("tiktok", title, file_path, tags, publish_date, account_file, **kwargs)
+
+
+if __name__ == "__main__":
+    # 示例运行代码
+    asyncio.run(upload_to_facebook(
+        "测试视频",
+        "videos/demo.mp4",
+        "测试 标签",
+        0,  # 立即发布
+        "cookies/fb_cookie.json"
+    ))
+    
+    # 或者使用通用函数
+    asyncio.run(run_upload(
+        "youtube",
+        "YouTube测试视频", 
+        "videos/demo.mp4",
+        "测试 YouTube 标签",
+        0,
+        "cookies/yt_cookie.json"
+    ))
