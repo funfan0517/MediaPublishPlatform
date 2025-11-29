@@ -701,8 +701,15 @@ class BaseFileUploader(object):
                 # 尝试查找上传按钮
                 upload_button = await self.find_button(self.upload_button_selectors)
                 self.logger.info(f"发布尝试 {attempt}，上传按钮可见状态: {await upload_button.is_visible()}")
-
-                if upload_button:
+                
+                current_url = page.url
+                self.logger.info(f"当前url: {current_url}")
+                if self.file_type == 1:
+                    target_url = self.creator_image_url
+                else:
+                    target_url = self.creator_video_url
+                # 如果上传按钮可见（或当前url已不在发布页面），说明发布成功
+                if upload_button or target_url not in current_url:
                     await upload_button.wait_for(state='visible', timeout=self.button_visible_timeout)
                     self.publish_status = True
                     break
