@@ -42,6 +42,8 @@ PLATFORM_CONFIGS = {
             # 平台功能支持
             #是否跳过Cookie验证
             "skip_cookie_verify": True,
+            #是否支持图文发布
+            "image_publish": True,
             #是否支持标题
             "title": True,
             #是否支持正文
@@ -80,6 +82,8 @@ PLATFORM_CONFIGS = {
             # 平台功能支持
             #是否跳过Cookie验证
             "skip_cookie_verify": True,
+            #是否支持图文发布
+            "image_publish": True,
             #是否支持标题
             "title": True,
             #是否支持正文
@@ -115,6 +119,8 @@ PLATFORM_CONFIGS = {
             # 平台功能支持
             #是否跳过Cookie验证
             "skip_cookie_verify": True,
+            #是否支持图文发布
+            "image_publish": True,
             #是否支持标题
             "title": True,
             #是否支持正文
@@ -158,6 +164,8 @@ PLATFORM_CONFIGS = {
             # 平台功能支持
             #是否跳过Cookie验证
             "skip_cookie_verify": True,
+            #是否支持图文发布
+            "image_publish": True,
             #是否支持标题
             "title": False,
             #是否支持正文
@@ -196,6 +204,8 @@ PLATFORM_CONFIGS = {
             # 平台功能支持
             #是否跳过Cookie验证
             "skip_cookie_verify": True,
+            #是否支持图文发布
+            "image_publish": False,
             #是否支持标题
             "title": False,
             #是否支持正文
@@ -234,6 +244,8 @@ PLATFORM_CONFIGS = {
             # 平台功能支持
             #是否跳过Cookie验证
             "skip_cookie_verify": True,
+            #是否支持图文发布
+            "image_publish": True,
             #是否支持标题
             "title": True,
             #是否支持正文
@@ -280,6 +292,8 @@ PLATFORM_CONFIGS = {
             # 平台功能支持
             #是否跳过Cookie验证
             "skip_cookie_verify": True,
+            #是否支持图文发布
+            "image_publish": True,
             #是否支持标题
             "title": True,
             #是否支持正文
@@ -319,6 +333,8 @@ PLATFORM_CONFIGS = {
             # 平台功能支持
             #是否跳过Cookie验证
             "skip_cookie_verify": True,
+            #是否支持图文发布
+            "image_publish": True,
             #是否支持标题
             "title": True,
             #是否支持正文
@@ -359,6 +375,8 @@ PLATFORM_CONFIGS = {
             # 平台功能支持
             #是否跳过Cookie验证
             "skip_cookie_verify": True,
+            #是否支持图文发布
+            "image_publish": True,
             #是否支持标题
             "title": True,
             #是否支持正文
