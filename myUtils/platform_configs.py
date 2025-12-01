@@ -257,21 +257,27 @@ PLATFORM_CONFIGS = {
     "facebook": {
         "type": 7,
         "platform_name": "fb",
-        "personal_url": "https://www.facebook.com/",
+        "personal_url": "https://www.facebook.com/profile.php",
         "login_url": "https://www.facebook.com/login",
         "creator_video_url": "https://www.facebook.com/video/upload",
         "creator_image_url": "https://www.facebook.com/photo/upload",
         "selectors": {
-            "upload_button": ['input[type="file"]'],
-            "publish_button": ['button:has-text("发布")'],
+            "upload_button": ['div[aria-label="照片/视频"]','div[aria-label="Photo/Video"]'],
+            "publish_button": ['//span[text()="发帖"]','//span[text()="Post"]','//span[text()="Schedule"]','//span[text()="发布"]'],
             #标题编辑器选择器
-            "title_editor": ['#user_message'],
+            "title_editor": [          
+                # 中文界面选择器
+                '[contenteditable="true"][role="textbox"][data-lexical-editor="true"]',
+                '[aria-placeholder*="分享你的新鲜事"][contenteditable="true"]',
+                # 英文界面选择器
+                '[aria-label="Add a description"]',
+                '[aria-label="Write something..."]'],
             #正文编辑器输入框选择器
             "textbox_selectors": [
                 'div.tiptap.ProseMirror[contenteditable="true"][role="textbox"]'
             ],
-            "thumbnail_button": ["//span[contains(text(), '添加封面')]"],
-            "schedule_button": ['button:has-text("定时发布")'],
+            "thumbnail_button": ["//span[contains(text(), 'Add')]","//span[contains(text(), '添加')]"],
+            "schedule_button": ["//span[text()='Schedule']","//span[text()='定时']"],
             "date_input": ['.date-picker-input'],
             "time_input": ['.time-picker-input'],
         },
