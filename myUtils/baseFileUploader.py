@@ -271,7 +271,7 @@ class BaseFileUploader(object):
             if count > 0:
                 # 异步等待元素可交互（避免元素未加载完成）
                 await self.locator_base.locator(selector).wait_for(state="visible", timeout=self.button_visible_timeout)
-                # self.logger.info(f"找到按钮定位器: {selector}, 是否可见: {await self.locator_base.locator(selector).is_visible()}")
+                self.logger.info(f"找到按钮定位器: {selector}, 是否可见: {await self.locator_base.locator(selector).is_visible()}")
                 # 返回找到的按钮定位器
                 return self.locator_base.locator(selector)
 
@@ -310,21 +310,30 @@ class BaseFileUploader(object):
         """
         while True:
             try:
-                # 使用find_button方法查找发布按钮
-                publish_button = await self.find_button(self.publish_button_selectors)
-                
-                # 检查发布按钮是否可点击
-                if publish_button and await publish_button.get_attribute("disabled") is None:
-                    self.logger.info("  [-]video uploaded.")
-                    break
+                #快手平台比较特殊，没传完也可以点击发布按钮，需要等编辑画布按钮出现，才算是上传完毕
+                if self.platform_name == "ks":
+                    number = await page.locator("text=上传中").count()
+                    if number == 0:
+                        self.logger.success("视频上传完毕")
+                        break
+                    else:
+                        self.logger.info("正在上传视频中...")
+                        await asyncio.sleep(self.check_interval)
                 else:
-                    self.logger.info("  [-] video uploading...")
-                    await asyncio.sleep(self.check_interval)
-                    # 检查是否有错误需要重试，使用中文和英文选择器
-                    error_element = await self.find_button(self.error_selectors)
-                    if error_element:
-                        self.logger.info("  [-] found error while uploading now retry...")
-                        await self.handle_upload_error(page)
+                    # 其他平台，使用find_button方法查找发布按钮，发布按钮能点了就代表上传完毕了
+                    publish_button = await self.find_button(self.publish_button_selectors)               
+                    # 检查发布按钮是否可点击
+                    if publish_button and await publish_button.get_attribute("disabled") is None:
+                        self.logger.info("视频上传完毕")
+                        break
+                    else:
+                        self.logger.info("正在上传视频中...")
+                        await asyncio.sleep(self.check_interval)
+                        # 检查是否有错误需要重试，使用中文和英文选择器
+                        error_element = await self.find_button(self.error_selectors)
+                        if error_element:
+                            self.logger.info("  [-] found error while uploading now retry...")
+                            await self.handle_upload_error(page)
             except Exception as e:
                 self.logger.info(f"  [-] video uploading... Error: {str(e)}")
                 await asyncio.sleep(self.check_interval)
@@ -462,11 +471,13 @@ class BaseFileUploader(object):
                 publish_button = await self.find_button(self.publish_button_selectors)
                 if publish_button:
                     await publish_button.click()
+                    await asyncio.sleep(self.check_interval)
 
                 # 步骤2: 等待视频处理完成（通过检查上传按钮重新出现）
                 self.logger.info("等待发布完成...")
                 current_url = page.url
                 self.logger.info(f"当前url: {current_url}")
+                #ks平台、等待发布完成
                 if self.file_type == 1:
                     target_url = self.creator_image_url
                 else:
@@ -475,7 +486,7 @@ class BaseFileUploader(object):
                 if target_url not in current_url:
                     self.publish_status = True
                     break
-
+                #xx平台等待发布完成
                 # 尝试查找上传按钮，如果上传按钮可见，也能说明发布成功
                 upload_button = await self.find_button(self.upload_button_selectors)
                 self.logger.info(f"发布尝试 {attempt}，上传按钮可见状态: {await upload_button.is_visible()}")

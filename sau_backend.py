@@ -519,8 +519,8 @@ def login():
     response.headers['Connection'] = 'keep-alive'
     return response
 
-@app.route('/postVideo', methods=['POST'])
-def postVideo():
+@app.route('/postVideo1', methods=['POST'])
+def postVideo1():
     """
     参数说明：
     type: 发布平台类型，1-小红书 2-视频号 3-抖音 4-快手
@@ -589,8 +589,8 @@ def postVideo():
             "data": None
         }), 200
 
-@app.route('/postVideo2', methods=['POST'])
-def postVideo2():
+@app.route('/postVideo', methods=['POST'])
+def postVideo():
     """
     参数说明：
     type: 发布平台类型号，1-小红书 2-视频号 3-抖音 4-快手 5-tiktok 6-instagram 7-facebook
@@ -600,6 +600,8 @@ def postVideo2():
     title: 文件标题
     text: 文件正文描述
     tags: 文件标签，逗号分隔
+    thumbnail: 视频缩略图封面路径
+    location: 视频发布位置，1-国内 2-海外
     category: 文件分类，0-无分类 1-美食 2-日常 3-旅行 4-娱乐 5-教育 6-其他
     enableTimer: 是否启用定时发布，0-否 1-是
     videosPerDay: 每天发布文件数量
@@ -621,6 +623,7 @@ def postVideo2():
     if category == 0:
         category = None
     thumbnail_path = data.get('thumbnail', '') #视频缩略图封面路径
+    location = data.get('location', 1) #视频发布位置，1-国内 2-海外
     productLink = data.get('productLink', '') #商品链接
     productTitle = data.get('productTitle', '') #商品标题
     is_draft = data.get('isDraft', False)  # 是否保存为草稿
@@ -654,7 +657,7 @@ def postVideo2():
                 "data": None
             }), 400
 
-    post_file(platform, account_list, file_type, file_list, title, text, tags, enableTimer, videos_per_day, daily_times,start_days)
+    post_file(platform, account_list, file_type, file_list, title, text, tags, thumbnail_path, location, enableTimer, videos_per_day, daily_times,start_days)
     # 返回响应给客户端
     return jsonify(
         {
