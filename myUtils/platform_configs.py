@@ -59,17 +59,17 @@ PLATFORM_CONFIGS = {
     "tencent": {
         "type": 2,
         "platform_name": "tc",
-        "personal_url": "https://channels.weixin.qq.com/platform/home",
-        "login_url": "https://channels.weixin.qq.com/login",
+        "personal_url": "https://channels.weixin.qq.com/platform/",
+        "login_url": "https://channels.weixin.qq.com/login.html",
         "creator_video_url": "https://channels.weixin.qq.com/platform/post/create",
-        "creator_image_url": "https://channels.weixin.qq.com/platform/post/create",
+        "creator_image_url": "https://channels.weixin.qq.com/platform/post/finderNewLifeCreate",
         "selectors": {
-            "upload_button": ['span.semi-button-content-right:has-text("上传视频")'],
-            "publish_button": ['button.button-dhlUZE:has-text("发布")'],
-            "title_editor": ['input.semi-input.semi-input-default'],
+            "upload_button": ['span.add-icon.weui-icon-outlined-add', 'div.upload-content'],
+            "publish_button": ['button.weui-desktop-btn.weui-desktop-btn_primary:has-text("发表")', 'button.weui-desktop-btn:has-text("发表")'],
+            "title_editor": ['input.weui-desktop-form__input[placeholder="概括视频主要内容，字数建议6-16个字符"]'],
             #正文编辑器输入框选择器
             "textbox_selectors": [
-                'div.tiptap.ProseMirror[contenteditable="true"][role="textbox"]'
+                'div.input-editor[contenteditable=""][data-placeholder="添加描述"]'
             ],
             "thumbnail_button": ["//span[contains(text(), '添加封面')]"],
             "schedule_button": ['label:has-text("定时")'],
