@@ -266,8 +266,8 @@ PLATFORM_CONFIGS = {
         "platform_name": "fb",
         "personal_url": "https://www.facebook.com/profile.php",
         "login_url": "https://www.facebook.com/login",
-        "creator_video_url": "https://www.facebook.com/video/upload",
-        "creator_image_url": "https://www.facebook.com/photo/upload",
+        "creator_video_url": "https://www.facebook.com/",
+        "creator_image_url": "https://www.facebook.com/",
         "selectors": {
             "upload_button": ['div[aria-label="照片/视频"]','div[aria-label="Photo/Video"]'],
             "publish_button": ['//span[text()="发帖"]','//span[text()="Post"]','//span[text()="Schedule"]','//span[text()="发布"]'],
@@ -297,7 +297,7 @@ PLATFORM_CONFIGS = {
             #是否支持标题
             "title": True,
             #是否支持正文
-            "textbox": True,
+            "textbox": False,
             #是否支持标签
             "tags": True,
             #是否支持封面
