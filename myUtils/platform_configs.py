@@ -102,10 +102,9 @@ PLATFORM_CONFIGS = {
         "creator_video_url": "https://creator.douyin.com/creator-micro/content/upload",
         "creator_image_url": "https://creator.douyin.com/creator-micro/content/upload?default-tab=3",
         "selectors": {
-            "upload_button": ['span.semi-button-content-right:has-text("上传视频")'],
+            "upload_button": ['span.semi-button-content-right:has-text("上传视频")', 'span.semi-button-content-right:has-text("上传图文")'],
             "publish_button": ['role=button[name="发布"]', 'button:has-text("发布"):not(:has-text("高清发布"))', 'text="发布"'],
             "title_editor": ['input[placeholder="填写作品标题，为作品获得更多流量"]', 'input.semi-input.semi-input-default'],
-
             "textbox_selectors": ['div[data-line-wrapper="true"]', 'div.zone-container.editor-kit-container.editor.editor-comp-publish[contenteditable="true"]'],
             "thumbnail_button": ["//span[contains(text(), '添加封面')]"],
             "schedule_button": ['button:has-text("定时发布")'],
