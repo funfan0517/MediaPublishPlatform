@@ -589,7 +589,7 @@ def postVideo1():
             "data": None
         }), 200
 
-# 将单个视频发布到指定平台
+# 将单个或多个视频发布到指定平台
 @app.route('/postVideo', methods=['POST'])
 def postVideo():
     """
