@@ -6,7 +6,7 @@ from utils.files_times import generate_schedule_time_next_day
 
 def post_file(platform, account_file, file_type, files, title, text,tags,thumbnail_path, location, enableTimer=False, videos_per_day=1, daily_times=None, start_days=0):
     """
-    发布文件到各种平台
+    批量发布多个文件到某个平台
     参数:
         platform: 平台名称
         account_file: 账号文件列表

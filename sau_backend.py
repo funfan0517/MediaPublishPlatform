@@ -519,8 +519,9 @@ def login():
     response.headers['Connection'] = 'keep-alive'
     return response
 
-@app.route('/postVideo', methods=['POST'])
-def postVideo():
+# 将单个视频发布到指定平台（原版）
+@app.route('/postVideo1', methods=['POST'])
+def postVideo1():
     """
     参数说明：
     type: 发布平台类型，1-小红书 2-视频号 3-抖音 4-快手
@@ -589,8 +590,9 @@ def postVideo():
             "data": None
         }), 200
 
-@app.route('/postVideo2', methods=['POST'])
-def postVideo2():
+# 将单个视频发布到指定平台
+@app.route('/postVideo', methods=['POST'])
+def postVideo():
     """
     参数说明：
     type: 发布平台类型号，1-小红书 2-视频号 3-抖音 4-快手 5-tiktok 6-instagram 7-facebook
@@ -701,6 +703,8 @@ def updateUserinfo():
             "data": None
         }), 500
 
+
+# 将多个视频批量发布到同一个平台（原版）
 @app.route('/postVideoBatch', methods=['POST'])
 def postVideoBatch():
     data_list = request.get_json()

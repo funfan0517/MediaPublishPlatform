@@ -16,7 +16,7 @@ from .platform_configs import PLATFORM_CONFIGS
 
 class BaseFileUploader(object):
     """
-    通用视频上传器基类参数说明：
+    单个视频上传器通用基类参数说明：
     account_file: 账号cookie文件路径
     file_type: 文件类型，1为图文，2为视频
     file_path: 文件路径
@@ -171,7 +171,7 @@ class BaseFileUploader(object):
 
     async def upload(self, playwright: Playwright) -> None:
         """
-        作用：执行视频上传
+        作用：执行单个视频上传到某个平台
         """
         self.logger.info(f'开始上传视频: {self.title}')
         # step1.创建浏览器实例
@@ -610,7 +610,7 @@ class BaseFileUploader(object):
 # 工厂函数和便捷函数
 async def run_upload(platform, account_file, file_type, file_path, title, text, tags, thumbnail_path, location, publish_date, **kwargs):
     """
-    运行上传任务
+    运行单个文件上传到某个平台的任务
     """
     uploader = BaseFileUploader(platform, account_file, file_type, file_path, title, text, tags, thumbnail_path, location, publish_date)
     return await uploader.main()
