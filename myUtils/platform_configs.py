@@ -20,6 +20,7 @@ PLATFORM_CONFIGS = {
             "publish_button": ['div.d-button-content span.d-text:has-text("发布")'],
             #标题编辑器选择器
             "title_editor": [
+                'input.d-text[type="text"][placeholder*="填写标题"]',
                 '[contenteditable="true"][role="textbox"][data-lexical-editor="true"]',
                 '[aria-placeholder*="分享你的新鲜事"][contenteditable="true"]',
                 '[aria-label="Add a description"]',
