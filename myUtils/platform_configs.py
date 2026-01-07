@@ -149,11 +149,11 @@ PLATFORM_CONFIGS = {
             "title_editor": ['div:has-text("描述") + div'],
             #正文编辑器输入框选择器
             "textbox_selectors": [
-                'div:has-text("描述") + div',
-                'div.tiptap.ProseMirror[contenteditable="true"][role="textbox"]',
+                'div#work-description-edit',
                 'div#work-description-edit[contenteditable="true"]',
+                'div#work-description-edit[contenteditable="true"][placeholder="添加合适的话题和描述，作品能获得更多推荐～"]',
+                'div.tiptap.ProseMirror[contenteditable="true"][role="textbox"]',
                 '[contenteditable="true"][placeholder*="添加合适的话题和描述"]',
-                '[contenteditable="true"][id*="description"][class*="description"]'
             ],
             "thumbnail_button": ["//span[contains(text(), '封面编辑')]"],
             "schedule_button": ['label:text("发布时间") + div .ant-radio-input'],
