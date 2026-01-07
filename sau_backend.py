@@ -12,7 +12,7 @@ from myUtils.auth import check_cookie
 from flask import Flask, request, jsonify, Response, send_from_directory
 from myUtils.login import douyin_cookie_gen, get_tencent_cookie, get_ks_cookie, xiaohongshu_cookie_gen, get_tiktok_cookie, get_instagram_cookie, get_facebook_cookie
 from myUtils.multiFileUploader import post_file, post_multiple_files_to_multiple_platforms, post_single_file_to_multiple_platforms
-from myUtils.platform_configs import get_platform_key_by_type
+from myUtils.platform_configs import get_platform_key_by_type, get_type_by_platform_key
 
 active_queues = {}
 app = Flask(__name__)
@@ -956,6 +956,32 @@ def post_videos_to_multiple_platforms():
         videos_per_day = data.get('videosPerDay', 1) # 每天发布文件数量
         daily_times = data.get('dailyTimes', []) # 每天发布时间，逗号分隔，格式为HH:MM
         start_days = data.get('startDays', 0) # 开始发布时间，距离当前时间的天数
+        
+        # 修复Account Files：过滤每个平台的账号文件，只保留对应类型的文件
+        # 1. 获取所有账号的实际类型映射
+        file_type_map = {}
+        with sqlite3.connect(Path(BASE_DIR / "db" / "database.db")) as conn:
+            cursor = conn.cursor()
+            cursor.execute("SELECT filePath, type FROM user_info")
+            rows = cursor.fetchall()
+            for row in rows:
+                file_type_map[row[0]] = row[1]
+        
+        # 2. 过滤每个平台的账号文件
+        filtered_account_files = {}
+        for platform, account_files_list in account_files.items():
+            # 获取当前平台对应的类型
+            platform_type = get_type_by_platform_key(platform)
+            if platform_type is None:
+                filtered_account_files[platform] = []
+                continue
+            
+            # 过滤出类型匹配的文件
+            filtered_files = [file for file in account_files_list if file in file_type_map and file_type_map[file] == platform_type]
+            filtered_account_files[platform] = filtered_files
+        
+        # 使用过滤后的账号文件
+        account_files = filtered_account_files
         
         # 打印获取到的数据
         print("Platforms:", platforms)
