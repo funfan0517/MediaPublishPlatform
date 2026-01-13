@@ -7,7 +7,7 @@ import os
 import asyncio
 
 from conf import LOCAL_CHROME_PATH, LOCAL_CHROME_HEADLESS
-from uploader.ins_uploader.ins_config import Ins_Locator
+from oldFileUpload.uploader.ins_uploader.ins_config import Ins_Locator
 from utils.base_social_media import set_init_script
 from utils.files_times import get_absolute_path
 from utils.log import instagram_logger

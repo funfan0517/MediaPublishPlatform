@@ -7,7 +7,7 @@ import os
 import asyncio
 
 from conf import LOCAL_CHROME_PATH, LOCAL_CHROME_HEADLESS
-from uploader.tk_uploader.tk_config import Tk_Locator
+from oldFileUpload.uploader.tk_uploader.tk_config import Tk_Locator
 from utils.base_social_media import set_init_script
 from utils.files_times import get_absolute_path
 from utils.log import tiktok_logger

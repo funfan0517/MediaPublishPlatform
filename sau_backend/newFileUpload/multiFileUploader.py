@@ -1,7 +1,7 @@
 import asyncio
 from pathlib import Path
 from conf import BASE_DIR
-from myUtils.baseFileUploader import BaseFileUploader, run_upload
+from .baseFileUploader import BaseFileUploader, run_upload
 from utils.files_times import generate_schedule_time_next_day
 
 def post_file(platform, account_file, file_type, files, title, text,tags,thumbnail_path, location, enableTimer=False, videos_per_day=1, daily_times=None, start_days=0):

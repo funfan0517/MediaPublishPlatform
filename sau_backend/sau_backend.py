@@ -11,8 +11,8 @@ from conf import BASE_DIR
 from myUtils.auth import check_cookie
 from flask import Flask, request, jsonify, Response, send_from_directory
 from myUtils.login import douyin_cookie_gen, get_tencent_cookie, get_ks_cookie, xiaohongshu_cookie_gen, get_tiktok_cookie, get_instagram_cookie, get_facebook_cookie
-from myUtils.multiFileUploader import post_file, post_multiple_files_to_multiple_platforms, post_single_file_to_multiple_platforms
-from myUtils.platform_configs import get_platform_key_by_type, get_type_by_platform_key
+from newFileUpload.multiFileUploader import post_file, post_multiple_files_to_multiple_platforms, post_single_file_to_multiple_platforms
+from newFileUpload.platform_configs import get_platform_key_by_type, get_type_by_platform_key
 
 active_queues = {}
 app = Flask(__name__)

@@ -8,7 +8,7 @@ from utils.base_social_media import set_init_script
 import uuid
 from pathlib import Path
 from conf import BASE_DIR, LOCAL_CHROME_HEADLESS
-from uploader.tk_uploader.main_chrome import tiktok_logger
+from utils.log import tiktok_logger, instagram_logger
 
 # 抖音登录
 async def douyin_cookie_gen(id,status_queue):
@@ -303,7 +303,7 @@ async def xiaohongshu_cookie_gen(id,status_queue):
         status_queue.put("200")
 
 # 导入必要的模块
-from uploader.tk_uploader.main import cookie_auth
+from oldFileUpload.uploader.tk_uploader.main import cookie_auth
 from playwright.async_api import async_playwright
 import uuid
 from pathlib import Path
@@ -389,9 +389,6 @@ async def get_tiktok_cookie(id, status_queue):
 # Instagram登录
 async def get_instagram_cookie(id, status_queue):
     try:
-        # 导入Instagram的logger和cookie_auth函数
-        from uploader.ins_uploader.main_chrome import instagram_logger, cookie_auth
-        
         # 生成UUID并准备cookie文件路径
         uuid_v1 = uuid.uuid1()
         cookies_dir = Path(BASE_DIR / "cookiesFile")
