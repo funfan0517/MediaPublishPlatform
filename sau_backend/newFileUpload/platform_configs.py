@@ -311,18 +311,18 @@ PLATFORM_CONFIGS = {
     "bilibili": {
         "type": 8,
         "platform_name": "bilibili",
-        "personal_url": "https://member.bilibili.com/v2#/home",
+        "personal_url": "https://member.bilibili.com/platform/home",
         "login_url": "https://passport.bilibili.com/login",
-        "creator_video_url": "https://member.bilibili.com/v2#/upload/manual",
-        "creator_image_url": "https://member.bilibili.com/v2#/upload/manual",
+        "creator_video_url": "https://member.bilibili.com/platform/upload/video/frame",
+        "creator_image_url": "https://member.bilibili.com/platform/upload/video/frame",
         "selectors": {
-            "upload_button": ['input[type="file"]'],
-            "publish_button": ['button:has-text("发布")'],
+            "upload_button": ['.upload-btn', '.upload-area'],
+            "publish_button": ['span.submit-add:has-text("立即投稿")'],
             #标题编辑器选择器
-            "title_editor": ['#title'],
+            "title_editor": ['input.input-val[type="text"][placeholder="请输入稿件标题"]'],
             #正文编辑器输入框选择器
             "textbox_selectors": [
-                'div.tiptap.ProseMirror[contenteditable="true"][role="textbox"]'
+                'div.ql-editor.ql-blank[contenteditable="true"][data-placeholder="填写更全面的相关信息，让更多的人能找到你的视频吧"]'
             ],
             "thumbnail_button": ["//span[contains(text(), '添加封面')]"],
             "schedule_button": ['button:has-text("定时发布")'],
@@ -353,10 +353,10 @@ PLATFORM_CONFIGS = {
     "baijiahao": {
         "type": 9,
         "platform_name": "baijiahao",
-        "personal_url": "https://baijiahao.baidu.com/builder/rc/list",
-        "login_url": "https://baijiahao.baidu.com/builder/rc/login",
-        "creator_video_url": "https://baijiahao.baidu.com/builder/rc/edit",
-        "creator_image_url": "https://baijiahao.baidu.com/builder/rc/edit",
+        "personal_url": "https://baijiahao.baidu.com/builder/rc/home",
+        "login_url": "https://baijiahao.baidu.com/builder/theme/bjh/login",
+        "creator_video_url": "https://baijiahao.baidu.com/builder/rc/edit?type=videoV2",
+        "creator_image_url": "https://baijiahao.baidu.com/builder/rc/edit?type=news",
         "selectors": {
             "upload_button": ['input[type="file"]'],
             "publish_button": ['button:has-text("发布")'],
