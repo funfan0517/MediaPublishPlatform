@@ -510,5 +510,129 @@ async def get_facebook_cookie(id, status_queue):
         if 'browser' in locals():
             await browser.close()
 
+# Bilibili登录
+async def get_bilibili_cookie(id, status_queue):
+    try:
+        # 生成UUID并准备cookie文件路径
+        uuid_v1 = uuid.uuid1()
+        cookies_dir = Path(BASE_DIR / "cookiesFile")
+        cookies_dir.mkdir(exist_ok=True)
+        account_file = cookies_dir / f"{uuid_v1}.json"
+        
+        async with async_playwright() as playwright:
+            options = {
+                'args': [
+                    '--lang zh-CN',
+                ],
+                'headless': LOCAL_CHROME_HEADLESS,  # 设置为非无头模式以允许用户登录
+            }
+            browser = await playwright.chromium.launch(**options)
+            context = await browser.new_context()
+            context = await set_init_script(context)
+            page = await context.new_page()
+            
+            # 访问Bilibili登录页面
+            await page.goto("https://passport.bilibili.com/login")
+            
+            # 提示用户登录
+            tiktok_logger.info("请在浏览器中完成Bilibili登录...")
+            status_queue.put("请在浏览器中完成Bilibili登录...")
+            
+            # 等待用户完成登录，检查是否成功跳转到主页
+            try:
+                # 等待URL变化，表明登录成功
+                await page.wait_for_url("https://www.bilibili.com/", timeout=300000)  # 5分钟超时
+                tiktok_logger.success("✅ Bilibili 登录成功")
+            except Exception as e:
+                tiktok_logger.error(f"[+] Bilibili 登录超时或失败: {str(e)}")
+                status_queue.put("500")
+                return None
+            
+            # 保存cookie
+            await context.storage_state(path=account_file)
+            tiktok_logger.success("✅ Bilibili cookie 已保存")
+            
+            # 保存账号信息到数据库，Bilibili平台ID设置为8
+            with sqlite3.connect(Path(BASE_DIR / "db" / "database.db")) as conn:
+                cursor = conn.cursor()
+                cursor.execute('''
+                                    INSERT INTO user_info (type, filePath, userName, status)
+                                    VALUES (?, ?, ?, ?)
+                                    ''', (8, f"{uuid_v1}.json", id, 1))
+                conn.commit()
+                tiktok_logger.success("✅ Bilibili 用户状态已记录")
+            
+            status_queue.put("200")
+            
+    except Exception as e:
+        tiktok_logger.error(f"[+] Bilibili 登录过程出错: {str(e)}")
+        status_queue.put("500")
+    finally:
+        # 确保资源被释放
+        if 'browser' in locals():
+            await browser.close()
+
+# Baijiahao登录
+async def get_baijiahao_cookie(id, status_queue):
+    try:
+        # 生成UUID并准备cookie文件路径
+        uuid_v1 = uuid.uuid1()
+        cookies_dir = Path(BASE_DIR / "cookiesFile")
+        cookies_dir.mkdir(exist_ok=True)
+        account_file = cookies_dir / f"{uuid_v1}.json"
+        
+        async with async_playwright() as playwright:
+            options = {
+                'args': [
+                    '--lang zh-CN',
+                ],
+                'headless': LOCAL_CHROME_HEADLESS,  # 设置为非无头模式以允许用户登录
+            }
+            browser = await playwright.chromium.launch(**options)
+            context = await browser.new_context()
+            context = await set_init_script(context)
+            page = await context.new_page()
+            
+            # 访问Baijiahao登录页面
+            await page.goto("https://baijiahao.baidu.com/builder/rc/login")
+            
+            # 提示用户登录
+            tiktok_logger.info("请在浏览器中完成Baijiahao登录...")
+            status_queue.put("请在浏览器中完成Baijiahao登录...")
+            
+            # 等待用户完成登录，检查是否成功跳转到主页
+            try:
+                # 等待URL变化，表明登录成功
+                await page.wait_for_url("https://baijiahao.baidu.com/builder/rc/list", timeout=300000)  # 5分钟超时
+                tiktok_logger.success("✅ Baijiahao 登录成功")
+            except Exception as e:
+                tiktok_logger.error(f"[+] Baijiahao 登录超时或失败: {str(e)}")
+                status_queue.put("500")
+                return None
+            
+            # 保存cookie
+            await context.storage_state(path=account_file)
+            tiktok_logger.success("✅ Baijiahao cookie 已保存")
+            
+            # 保存账号信息到数据库，Baijiahao平台ID设置为9
+            with sqlite3.connect(Path(BASE_DIR / "db" / "database.db")) as conn:
+                cursor = conn.cursor()
+                cursor.execute('''
+                                    INSERT INTO user_info (type, filePath, userName, status)
+                                    VALUES (?, ?, ?, ?)
+                                    ''', (9, f"{uuid_v1}.json", id, 1))
+                conn.commit()
+                tiktok_logger.success("✅ Baijiahao 用户状态已记录")
+            
+            status_queue.put("200")
+            
+    except Exception as e:
+        tiktok_logger.error(f"[+] Baijiahao 登录过程出错: {str(e)}")
+        status_queue.put("500")
+    finally:
+        # 确保资源被释放
+        if 'browser' in locals():
+            await browser.close()
+
 # a = asyncio.run(xiaohongshu_cookie_gen(4,None))
 # print(a)

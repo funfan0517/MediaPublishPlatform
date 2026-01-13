@@ -10,7 +10,7 @@ from flask_cors import CORS
 from conf import BASE_DIR
 from myUtils.auth import check_cookie
 from flask import Flask, request, jsonify, Response, send_from_directory
-from myUtils.login import douyin_cookie_gen, get_tencent_cookie, get_ks_cookie, xiaohongshu_cookie_gen, get_tiktok_cookie, get_instagram_cookie, get_facebook_cookie
+from myUtils.login import douyin_cookie_gen, get_tencent_cookie, get_ks_cookie, xiaohongshu_cookie_gen, get_tiktok_cookie, get_instagram_cookie, get_facebook_cookie, get_bilibili_cookie, get_baijiahao_cookie
 from newFileUpload.multiFileUploader import post_file, post_multiple_files_to_multiple_platforms, post_single_file_to_multiple_platforms
 from newFileUpload.platform_configs import get_platform_key_by_type, get_type_by_platform_key
 
@@ -606,6 +606,12 @@ def postVideo1():
         case 7:
             post_video_Facebook(title, file_list, tags, account_list, category, enableTimer, videos_per_day, daily_times,
                       start_days, thumbnail_path)
+        case 8:
+            # Bilibili发布，使用新的post_file函数
+            post_file("bilibili", account_list, file_type, file_list, title, text, tags, thumbnail_path, 1, enableTimer, videos_per_day, daily_times, start_days)
+        case 9:
+            # Baijiahao发布，使用新的post_file函数
+            post_file("baijiahao", account_list, file_type, file_list, title, text, tags, thumbnail_path, 1, enableTimer, videos_per_day, daily_times, start_days)
     # 返回响应给客户端
     return jsonify(
         {
@@ -790,6 +796,14 @@ def postVideoBatch():
                 print(f'[+] Batch publishing to Facebook')
                 # Facebook
                 post_video_Facebook(title, file_list, tags, account_list, enableTimer, videos_per_day, daily_times, start_days)
+            case 8:
+                print(f'[+] Batch publishing to Bilibili')
+                # Bilibili发布，使用新的post_file函数
+                post_file("bilibili", account_list, 2, file_list, title, text, tags, "", 1, enableTimer, videos_per_day, daily_times, start_days)
+            case 9:
+                print(f'[+] Batch publishing to Baijiahao')
+                # Baijiahao发布，使用新的post_file函数
+                post_file("baijiahao", account_list, 2, file_list, title, text, tags, "", 1, enableTimer, videos_per_day, daily_times, start_days)
     # 返回响应给客户端
     return jsonify(
         {
@@ -1063,6 +1077,16 @@ def run_async_function(type,id,status_queue):
             loop = asyncio.new_event_loop()
             asyncio.set_event_loop(loop)
             loop.run_until_complete(get_facebook_cookie(id,status_queue))
+            loop.close()
+        case '8':
+            loop = asyncio.new_event_loop()
+            asyncio.set_event_loop(loop)
+            loop.run_until_complete(get_bilibili_cookie(id,status_queue))
+            loop.close()
+        case '9':
+            loop = asyncio.new_event_loop()
+            asyncio.set_event_loop(loop)
+            loop.run_until_complete(get_baijiahao_cookie(id,status_queue))
             loop.close()
 
 # SSE 流生成器函数

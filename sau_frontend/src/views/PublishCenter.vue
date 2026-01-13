@@ -543,7 +543,9 @@ const platforms = [
   { key: 1, name: '小红书' },
   { key: 5, name: 'TikTok' },
   { key: 6, name: 'Instagram' },
-  { key: 7, name: 'Facebook' }
+  { key: 7, name: 'Facebook' },
+  { key: 8, name: 'Bilibili' },
+  { key: 9, name: 'Baijiahao' }
 ]
 
 const defaultTabInit = {
@@ -629,7 +631,9 @@ const availableAccounts = computed(() => {
     4: '快手',
     5: 'TikTok',
     6: 'Instagram',
-    7: 'Facebook'
+    7: 'Facebook',
+    8: 'Bilibili',
+    9: 'Baijiahao'
   }
   
   // 获取当前选中的所有平台对应的平台名称
@@ -833,7 +837,9 @@ const platformTypeMap = {
   4: 'kuaishou',
   5: 'tiktok',
   6: 'instagram',
-  7: 'facebook'
+  7: 'facebook',
+  8: 'bilibili',
+  9: 'baijiahao'
 }
 
 // 确认发布

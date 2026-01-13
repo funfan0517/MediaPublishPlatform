@@ -581,6 +581,150 @@
             </div>
           </div>
         </el-tab-pane>
+        
+        <el-tab-pane label="Bilibili" name="bilibili">
+          <div class="account-list-container">
+            <div class="account-search">
+              <el-input
+                v-model="searchKeyword"
+                placeholder="输入名称或账号搜索"
+                prefix-icon="Search"
+                clearable
+                @clear="handleSearch"
+                @input="handleSearch"
+              />
+              <div class="action-buttons">
+                <el-button type="primary" @click="handleAddAccount">添加账号</el-button>
+                <el-button type="info" @click="fetchAccounts" :loading="false">
+                  <el-icon :class="{ 'is-loading': appStore.isAccountRefreshing }"><Refresh /></el-icon>
+                  <span v-if="appStore.isAccountRefreshing">刷新中</span>
+                </el-button>
+              </div>
+            </div>
+            
+            <div v-if="filteredBilibiliAccounts.length > 0" class="account-list">
+              <el-table :data="filteredBilibiliAccounts" style="width: 100%">
+                <el-table-column label="头像" width="80">
+                  <template #default="scope">
+                    <el-avatar :src="getDefaultAvatar(scope.row.name, scope.row.platform)" :size="40" />
+                  </template>
+                </el-table-column>
+                <el-table-column prop="name" label="名称" width="180" />
+                <el-table-column prop="platform" label="平台">
+                  <template #default="scope">
+                    <el-tag
+                      :type="getPlatformTagType(scope.row.platform)"
+                      effect="plain"
+                    >
+                      {{ scope.row.platform }}
+                    </el-tag>
+                  </template>
+                </el-table-column>
+                <el-table-column prop="status" label="状态">
+                  <template #default="scope">
+                    <el-tag
+                      :type="getStatusTagType(scope.row.status)"
+                      effect="plain"
+                      :class="{'clickable-status': isStatusClickable(scope.row.status)}"
+                      @click="handleStatusClick(scope.row)"
+                    >
+                      <el-icon :class="scope.row.status === '验证中' ? 'is-loading' : ''" v-if="scope.row.status === '验证中'">
+                        <Loading />
+                      </el-icon>
+                      {{ scope.row.status }}
+                    </el-tag>
+                  </template>
+                </el-table-column>
+                <el-table-column label="操作">
+                  <template #default="scope">
+                    <div class="action-buttons">
+                      <el-button size="small" @click="handleEdit(scope.row)">编辑</el-button>
+                      <el-button size="small" type="primary" :icon="Download" @click="handleDownloadCookie(scope.row)">下载Cookie</el-button>
+                      <el-button size="small" type="info" :icon="Upload" @click="handleUploadCookie(scope.row)">上传Cookie</el-button>
+                      <el-button size="small" type="danger" @click="handleDelete(scope.row)">删除</el-button>
+                    </div>
+                  </template>
+                </el-table-column>
+              </el-table>
+            </div>
+            
+            <div v-else class="empty-data">
+              <el-empty description="暂无Bilibili账号数据" />
+            </div>
+          </div>
+        </el-tab-pane>
+        
+        <el-tab-pane label="Baijiahao" name="baijiahao">
+          <div class="account-list-container">
+            <div class="account-search">
+              <el-input
+                v-model="searchKeyword"
+                placeholder="输入名称或账号搜索"
+                prefix-icon="Search"
+                clearable
+                @clear="handleSearch"
+                @input="handleSearch"
+              />
+              <div class="action-buttons">
+                <el-button type="primary" @click="handleAddAccount">添加账号</el-button>
+                <el-button type="info" @click="fetchAccounts" :loading="false">
+                  <el-icon :class="{ 'is-loading': appStore.isAccountRefreshing }"><Refresh /></el-icon>
+                  <span v-if="appStore.isAccountRefreshing">刷新中</span>
+                </el-button>
+              </div>
+            </div>
+            
+            <div v-if="filteredBaijiahaoAccounts.length > 0" class="account-list">
+              <el-table :data="filteredBaijiahaoAccounts" style="width: 100%">
+                <el-table-column label="头像" width="80">
+                  <template #default="scope">
+                    <el-avatar :src="getDefaultAvatar(scope.row.name, scope.row.platform)" :size="40" />
+                  </template>
+                </el-table-column>
+                <el-table-column prop="name" label="名称" width="180" />
+                <el-table-column prop="platform" label="平台">
+                  <template #default="scope">
+                    <el-tag
+                      :type="getPlatformTagType(scope.row.platform)"
+                      effect="plain"
+                    >
+                      {{ scope.row.platform }}
+                    </el-tag>
+                  </template>
+                </el-table-column>
+                <el-table-column prop="status" label="状态">
+                  <template #default="scope">
+                    <el-tag
+                      :type="getStatusTagType(scope.row.status)"
+                      effect="plain"
+                      :class="{'clickable-status': isStatusClickable(scope.row.status)}"
+                      @click="handleStatusClick(scope.row)"
+                    >
+                      <el-icon :class="scope.row.status === '验证中' ? 'is-loading' : ''" v-if="scope.row.status === '验证中'">
+                        <Loading />
+                      </el-icon>
+                      {{ scope.row.status }}
+                    </el-tag>
+                  </template>
+                </el-table-column>
+                <el-table-column label="操作">
+                  <template #default="scope">
+                    <div class="action-buttons">
+                      <el-button size="small" @click="handleEdit(scope.row)">编辑</el-button>
+                      <el-button size="small" type="primary" :icon="Download" @click="handleDownloadCookie(scope.row)">下载Cookie</el-button>
+                      <el-button size="small" type="info" :icon="Upload" @click="handleUploadCookie(scope.row)">上传Cookie</el-button>
+                      <el-button size="small" type="danger" @click="handleDelete(scope.row)">删除</el-button>
+                    </div>
+                  </template>
+                </el-table-column>
+              </el-table>
+            </div>
+            
+            <div v-else class="empty-data">
+              <el-empty description="暂无Baijiahao账号数据" />
+            </div>
+          </div>
+        </el-tab-pane>
       </el-tabs>
     </div>
     
@@ -608,6 +752,8 @@
               <el-option label="TikTok" value="TikTok" />
               <el-option label="Instagram" value="Instagram" />
               <el-option label="Facebook" value="Facebook" />
+              <el-option label="Bilibili" value="Bilibili" />
+              <el-option label="Baijiahao" value="Baijiahao" />
             </el-select>
         </el-form-item>
         <el-form-item label="名称" prop="name">
@@ -753,7 +899,10 @@ const getPlatformTagType = (platform) => {
     '视频号': 'warning',
     '小红书': 'info',
     'TikTok': 'primary',
-    'Instagram': 'danger'
+    'Instagram': 'danger',
+    'Facebook': 'success',
+    'Bilibili': 'info',
+    'Baijiahao': 'warning'
   }
   return typeMap[platform] || 'info'
 }
@@ -817,6 +966,14 @@ const filteredInstagramAccounts = computed(() => {
 
 const filteredFacebookAccounts = computed(() => {
   return filteredAccounts.value.filter(account => account.platform === 'Facebook')
+})
+
+const filteredBilibiliAccounts = computed(() => {
+  return filteredAccounts.value.filter(account => account.platform === 'Bilibili')
+})
+
+const filteredBaijiahaoAccounts = computed(() => {
+  return filteredAccounts.value.filter(account => account.platform === 'Baijiahao')
 })
 
 // 搜索处理
@@ -1037,7 +1194,11 @@ const getDefaultAvatar = (name, platform) => {
     'Ins': insIcon,
     'ins': insIcon,
     'Facebook': facebookIcon,
-    'facebook': facebookIcon
+    'facebook': facebookIcon,
+    'Bilibili': kuaishouIcon,
+    'bilibili': kuaishouIcon,
+    'Baijiahao': kuaishouIcon,
+    'baijiahao': kuaishouIcon
   };
   
   console.log('当前平台:', platform, '类型:', typeof platform);
@@ -1094,7 +1255,9 @@ const connectSSE = (platform, name) => {
     '快手': '4',
     'TikTok': '5',
     'Instagram': '6',
-    'Facebook': '7'
+    'Facebook': '7',
+    'Bilibili': '8',
+    'Baijiahao': '9'
   }
 
   const type = platformTypeMap[platform] || '1'
@@ -1200,7 +1363,9 @@ const submitAccountForm = () => {
             '快手': 4,
             'TikTok': 5,
             'Instagram': 6,
-            'Facebook': 7
+            'Facebook': 7,
+            'Bilibili': 8,
+            'Baijiahao': 9
           };
           const type = platformTypeMap[accountForm.platform] || 1;
 
