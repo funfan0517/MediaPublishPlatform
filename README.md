@@ -133,7 +133,7 @@ sau/
 - ✅ 快手
 - ✅ TikTok
 - ✅ Instagram
-- ⏳ Facebook (开发中)
+- ✅ Facebook
 
 ### 2. 内容类型支持
 
@@ -260,7 +260,7 @@ npm run dev
 
 ### 9. 快速启动（Windows）
 
-对于 Windows 用户，您可以使用项目根目录下的 `start-win.bat` 脚本快速启动后端服务：
+对于 Windows 用户，您可以使用项目根目录下的 `start-win.bat` 脚本快速启动前后端服务：
 
 ```bash
 start-win.bat
@@ -298,10 +298,6 @@ start-win.bat
 5. 设置发布时间（可选）
 6. 点击「发布」按钮，系统将自动执行发布任务
 
-### 5. 查看发布历史
-
-1. 点击左侧导航栏的「发布历史」
-2. 查看所有发布任务的执行状态和结果
 
 ## API 文档
 
@@ -386,9 +382,8 @@ start-win.bat
 要添加新平台支持，您需要：
 
 1. 在 `sau_backend/newFileUpload/platform_configs.py` 中添加平台配置
-2. 在 `sau_backend/oldFileUpload/uploader/` 目录下创建对应的上传器实现
-3. 在 `sau_backend/myUtils/login.py` 中添加登录逻辑
-4. 在 `sau_backend/myUtils/auth.py` 中添加 Cookie 验证逻辑
+2. 在 `sau_backend/myUtils/login.py` 中添加登录逻辑
+3. 在 `sau_backend/myUtils/auth.py` 中添加 Cookie 验证逻辑
 
 ### 4. 系统运行缓慢怎么办？
 
@@ -509,7 +504,7 @@ SOFTWARE.
 ## 联系方式
 
 - **GitHub Issues**：[https://github.com/fan-0517/SAU/issues](https://github.com/fan-0517/SAU/issues)
-- **Email**：your.email@example.com
+- **Email**：1424393744@qq.com
 
 ## 更新日志
 
