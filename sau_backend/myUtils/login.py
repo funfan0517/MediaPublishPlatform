@@ -603,7 +603,7 @@ async def get_baijiahao_cookie(id, status_queue):
             # 等待用户完成登录，检查是否成功跳转到主页
             try:
                 # 等待URL变化，表明登录成功
-                await page.wait_for_url("https://baijiahao.baidu.com/builder/rc/list", timeout=300000)  # 5分钟超时
+                await page.wait_for_url("https://baijiahao.baidu.com/builder/rc/home", timeout=300000)  # 5分钟超时
                 tiktok_logger.success("✅ Baijiahao 登录成功")
             except Exception as e:
                 tiktok_logger.error(f"[+] Baijiahao 登录超时或失败: {str(e)}")
