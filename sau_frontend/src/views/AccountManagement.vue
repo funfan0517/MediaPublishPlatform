@@ -19,9 +19,10 @@
               />
               <div class="action-buttons">
                 <el-button type="primary" @click="handleAddAccount">添加账号</el-button>
-                <el-button type="info" @click="fetchAccounts" :loading="false">
-                  <el-icon :class="{ 'is-loading': appStore.isAccountRefreshing }"><Refresh /></el-icon>
-                  <span v-if="appStore.isAccountRefreshing">刷新中</span>
+                <el-button type="primary" @click="fetchAccounts" :loading="false">
+                  <el-icon :class="{ 'is-loading': appStore.isAccountRefreshing }" v-if="appStore.isAccountRefreshing"><Loading /></el-icon>
+                  <el-icon v-else><Refresh /></el-icon>
+                  <span>{{ appStore.isAccountRefreshing ? '刷新中' : '刷新账号状态' }}</span>
                 </el-button>
               </div>
             </div>
@@ -92,9 +93,10 @@
               />
               <div class="action-buttons">
                 <el-button type="primary" @click="handleAddAccount">添加账号</el-button>
-                <el-button type="info" @click="fetchAccounts" :loading="false">
-                  <el-icon :class="{ 'is-loading': appStore.isAccountRefreshing }"><Refresh /></el-icon>
-                  <span v-if="appStore.isAccountRefreshing">刷新中</span>
+                <el-button type="primary" @click="fetchAccounts" :loading="false">
+                  <el-icon :class="{ 'is-loading': appStore.isAccountRefreshing }" v-if="appStore.isAccountRefreshing"><Loading /></el-icon>
+                  <el-icon v-else><Refresh /></el-icon>
+                  <span>{{ appStore.isAccountRefreshing ? '刷新中' : '刷新账号状态' }}</span>
                 </el-button>
               </div>
             </div>
@@ -164,9 +166,10 @@
               />
               <div class="action-buttons">
                 <el-button type="primary" @click="handleAddAccount">添加账号</el-button>
-                <el-button type="info" @click="fetchAccounts" :loading="false">
-                  <el-icon :class="{ 'is-loading': appStore.isAccountRefreshing }"><Refresh /></el-icon>
-                  <span v-if="appStore.isAccountRefreshing">刷新中</span>
+                <el-button type="primary" @click="fetchAccounts" :loading="false">
+                  <el-icon :class="{ 'is-loading': appStore.isAccountRefreshing }" v-if="appStore.isAccountRefreshing"><Loading /></el-icon>
+                  <el-icon v-else><Refresh /></el-icon>
+                  <span>{{ appStore.isAccountRefreshing ? '刷新中' : '刷新账号状态' }}</span>
                 </el-button>
               </div>
             </div>
@@ -236,9 +239,10 @@
               />
               <div class="action-buttons">
                 <el-button type="primary" @click="handleAddAccount">添加账号</el-button>
-                <el-button type="info" @click="fetchAccounts" :loading="false">
-                  <el-icon :class="{ 'is-loading': appStore.isAccountRefreshing }"><Refresh /></el-icon>
-                  <span v-if="appStore.isAccountRefreshing">刷新中</span>
+                <el-button type="primary" @click="fetchAccounts" :loading="false">
+                  <el-icon :class="{ 'is-loading': appStore.isAccountRefreshing }" v-if="appStore.isAccountRefreshing"><Loading /></el-icon>
+                  <el-icon v-else><Refresh /></el-icon>
+                  <span>{{ appStore.isAccountRefreshing ? '刷新中' : '刷新账号状态' }}</span>
                 </el-button>
               </div>
             </div>
@@ -308,9 +312,10 @@
               />
               <div class="action-buttons">
                 <el-button type="primary" @click="handleAddAccount">添加账号</el-button>
-                <el-button type="info" @click="fetchAccounts" :loading="false">
-                  <el-icon :class="{ 'is-loading': appStore.isAccountRefreshing }"><Refresh /></el-icon>
-                  <span v-if="appStore.isAccountRefreshing">刷新中</span>
+                <el-button type="primary" @click="fetchAccounts" :loading="false">
+                  <el-icon :class="{ 'is-loading': appStore.isAccountRefreshing }" v-if="appStore.isAccountRefreshing"><Loading /></el-icon>
+                  <el-icon v-else><Refresh /></el-icon>
+                  <span>{{ appStore.isAccountRefreshing ? '刷新中' : '刷新账号状态' }}</span>
                 </el-button>
               </div>
             </div>
@@ -380,9 +385,10 @@
               />
               <div class="action-buttons">
                 <el-button type="primary" @click="handleAddAccount">添加账号</el-button>
-                <el-button type="info" @click="fetchAccounts" :loading="false">
-                  <el-icon :class="{ 'is-loading': appStore.isAccountRefreshing }"><Refresh /></el-icon>
-                  <span v-if="appStore.isAccountRefreshing">刷新中</span>
+                <el-button type="primary" @click="fetchAccounts" :loading="false">
+                  <el-icon :class="{ 'is-loading': appStore.isAccountRefreshing }" v-if="appStore.isAccountRefreshing"><Loading /></el-icon>
+                  <el-icon v-else><Refresh /></el-icon>
+                  <span>{{ appStore.isAccountRefreshing ? '刷新中' : '刷新账号状态' }}</span>
                 </el-button>
               </div>
             </div>
@@ -452,9 +458,10 @@
               />
               <div class="action-buttons">
                 <el-button type="primary" @click="handleAddAccount">添加账号</el-button>
-                <el-button type="info" @click="fetchAccounts" :loading="false">
-                  <el-icon :class="{ 'is-loading': appStore.isAccountRefreshing }"><Refresh /></el-icon>
-                  <span v-if="appStore.isAccountRefreshing">刷新中</span>
+                <el-button type="primary" @click="fetchAccounts" :loading="false">
+                  <el-icon :class="{ 'is-loading': appStore.isAccountRefreshing }" v-if="appStore.isAccountRefreshing"><Loading /></el-icon>
+                  <el-icon v-else><Refresh /></el-icon>
+                  <span>{{ appStore.isAccountRefreshing ? '刷新中' : '刷新账号状态' }}</span>
                 </el-button>
               </div>
             </div>
@@ -524,9 +531,10 @@
               />
               <div class="action-buttons">
                 <el-button type="primary" @click="handleAddAccount">添加账号</el-button>
-                <el-button type="info" @click="fetchAccounts" :loading="false">
-                  <el-icon :class="{ 'is-loading': appStore.isAccountRefreshing }"><Refresh /></el-icon>
-                  <span v-if="appStore.isAccountRefreshing">刷新中</span>
+                <el-button type="primary" @click="fetchAccounts" :loading="false">
+                  <el-icon :class="{ 'is-loading': appStore.isAccountRefreshing }" v-if="appStore.isAccountRefreshing"><Loading /></el-icon>
+                  <el-icon v-else><Refresh /></el-icon>
+                  <span>{{ appStore.isAccountRefreshing ? '刷新中' : '刷新账号状态' }}</span>
                 </el-button>
               </div>
             </div>
@@ -596,9 +604,10 @@
               />
               <div class="action-buttons">
                 <el-button type="primary" @click="handleAddAccount">添加账号</el-button>
-                <el-button type="info" @click="fetchAccounts" :loading="false">
-                  <el-icon :class="{ 'is-loading': appStore.isAccountRefreshing }"><Refresh /></el-icon>
-                  <span v-if="appStore.isAccountRefreshing">刷新中</span>
+                <el-button type="primary" @click="fetchAccounts" :loading="false">
+                  <el-icon :class="{ 'is-loading': appStore.isAccountRefreshing }" v-if="appStore.isAccountRefreshing"><Loading /></el-icon>
+                  <el-icon v-else><Refresh /></el-icon>
+                  <span>{{ appStore.isAccountRefreshing ? '刷新中' : '刷新账号状态' }}</span>
                 </el-button>
               </div>
             </div>
@@ -668,9 +677,10 @@
               />
               <div class="action-buttons">
                 <el-button type="primary" @click="handleAddAccount">添加账号</el-button>
-                <el-button type="info" @click="fetchAccounts" :loading="false">
-                  <el-icon :class="{ 'is-loading': appStore.isAccountRefreshing }"><Refresh /></el-icon>
-                  <span v-if="appStore.isAccountRefreshing">刷新中</span>
+                <el-button type="primary" @click="fetchAccounts" :loading="false">
+                  <el-icon :class="{ 'is-loading': appStore.isAccountRefreshing }" v-if="appStore.isAccountRefreshing"><Loading /></el-icon>
+                  <el-icon v-else><Refresh /></el-icon>
+                  <span>{{ appStore.isAccountRefreshing ? '刷新中' : '刷新账号状态' }}</span>
                 </el-button>
               </div>
             </div>
