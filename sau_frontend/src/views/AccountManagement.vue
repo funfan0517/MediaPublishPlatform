@@ -65,6 +65,7 @@
                       <el-button size="small" @click="handleEdit(scope.row)">编辑</el-button>
                       <el-button size="small" type="primary" :icon="Download" @click="handleDownloadCookie(scope.row)">下载Cookie</el-button>
                       <el-button size="small" type="info" :icon="Upload" @click="handleUploadCookie(scope.row)">上传Cookie</el-button>
+                      <el-button size="small" type="success" @click="handleVisitHomepage(scope.row)">访问主页</el-button>
                       <el-button size="small" type="danger" @click="handleDelete(scope.row)">删除</el-button>
                     </div>
                   </template>
@@ -1067,6 +1068,27 @@ const handleDelete = (row) => {
     .catch(() => {
       // 取消删除
     })
+}
+
+// 访问平台个人中心
+const handleVisitHomepage = async (row) => {
+  try {
+    // 调用API访问平台个人中心
+    const response = await accountApi.visitPlatformHomepage(row.id)
+    
+    if (response.code === 200) {
+      ElMessage({
+        type: 'success',
+        message: '访问成功',
+      })
+      console.log('访问结果:', response.data)
+    } else {
+      ElMessage.error(response.msg || '访问失败')
+    }
+  } catch (error) {
+    console.error('访问平台个人中心失败:', error)
+    ElMessage.error('访问失败')
+  }
 }
 
 // 下载Cookie文件

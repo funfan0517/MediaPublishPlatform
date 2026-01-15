@@ -7,12 +7,12 @@ import uuid
 from pathlib import Path
 from queue import Queue
 from flask_cors import CORS
-from conf import BASE_DIR
+from conf import BASE_DIR, LOCAL_CHROME_PATH
 from myUtils.auth import check_cookie
 from flask import Flask, request, jsonify, Response, send_from_directory
 from myUtils.login import douyin_cookie_gen, get_tencent_cookie, get_ks_cookie, xiaohongshu_cookie_gen, get_tiktok_cookie, get_instagram_cookie, get_facebook_cookie, get_bilibili_cookie, get_baijiahao_cookie
 from newFileUpload.multiFileUploader import post_file, post_multiple_files_to_multiple_platforms, post_single_file_to_multiple_platforms
-from newFileUpload.platform_configs import get_platform_key_by_type, get_type_by_platform_key
+from newFileUpload.platform_configs import get_platform_key_by_type, get_type_by_platform_key, PLATFORM_CONFIGS
 
 active_queues = {}
 app = Flask(__name__)
@@ -1331,6 +1331,105 @@ def download_cookie():
         return jsonify({
             "code": 500,
             "msg": f"下载Cookie文件失败: {str(e)}",
+            "data": None
+        }), 500
+
+
+# 访问平台个人中心API
+@app.route('/getPlatformHomepage', methods=['GET'])
+async def get_platform_homepage():
+    try:
+        # 获取账号ID
+        account_id = request.args.get('id')
+        if not account_id:
+            return jsonify({
+                "code": 400,
+                "msg": "缺少账号ID参数",
+                "data": None
+            }), 400
+
+        # 从数据库获取账号信息
+        with sqlite3.connect(Path(BASE_DIR / "db" / "database.db")) as conn:
+            conn.row_factory = sqlite3.Row
+            cursor = conn.cursor()
+            cursor.execute('SELECT filePath, type FROM user_info WHERE id = ?', (account_id,))
+            result = cursor.fetchone()
+
+        if not result:
+            return jsonify({
+                "code": 404,
+                "msg": "账号不存在",
+                "data": None
+            }), 404
+
+        file_path = result['filePath']
+        platform_type = result['type']
+
+        # 验证cookie文件是否存在
+        cookie_file_path = Path(BASE_DIR / "cookiesFile" / file_path)
+        if not cookie_file_path.exists():
+            return jsonify({
+                "code": 400,
+                "msg": "Cookie文件不存在",
+                "data": None
+            }), 400
+
+        # 获取平台配置
+        platform_key = get_platform_key_by_type(platform_type)
+        if not platform_key or platform_key not in PLATFORM_CONFIGS:
+            return jsonify({
+                "code": 400,
+                "msg": "平台配置不存在",
+                "data": None
+            }), 400
+
+        platform_config = PLATFORM_CONFIGS[platform_key]
+        personal_url = platform_config.get('personal_url')
+        if not personal_url:
+            return jsonify({
+                "code": 400,
+                "msg": "平台个人中心URL未配置",
+                "data": None
+            }), 400
+
+        # 使用playwright携带cookie访问个人中心
+        from playwright.async_api import async_playwright
+
+        async with async_playwright() as p:
+            # 启动浏览器
+            browser = await p.chromium.launch(
+                headless=False,
+                executable_path=LOCAL_CHROME_PATH
+            )
+            
+            # 创建上下文并加载cookie
+            context = await browser.new_context(storage_state=str(cookie_file_path))
+            
+            # 创建新页面并访问个人中心
+            page = await context.new_page()
+            await page.goto(personal_url, wait_until='domcontentloaded', timeout=30000)
+            
+            # 获取页面标题和截图（可选）
+            page_title = await page.title()
+            print(f"页面标题: {page_title}")
+
+
+
+        return jsonify({
+            "code": 200,
+            "msg": "访问成功",
+            "data": {
+                "platform": platform_key,
+                "personal_url": personal_url,
+                "page_title": page_title
+            }
+        }), 200
+
+    except Exception as e:
+        print(f"访问平台个人中心失败: {str(e)}")
+        return jsonify({
+            "code": 500,
+            "msg": f"访问平台个人中心失败: {str(e)}",
             "data": None
         }), 500
 
