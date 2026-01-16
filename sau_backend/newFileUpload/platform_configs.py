@@ -69,7 +69,13 @@ PLATFORM_CONFIGS = {
         "creator_video_url": "https://channels.weixin.qq.com/platform/post/create",
         "creator_image_url": "https://channels.weixin.qq.com/platform/post/finderNewLifeCreate",
         "selectors": {
-            "upload_button": ['span.add-icon.weui-icon-outlined-add', 'div.upload-content'],
+            "upload_button": [
+                'span.add-icon.weui-icon-outlined-add',
+                'div.upload-content',
+                '#container-wrap > div.container-center > div > div.main-body-wrap > div.main-body > div.weui-desktop-block.main-card > div > div > div > div:nth-child(2) > div.feed-list-opt > div.video-btn-wrap > div > button',
+                'xpath=/html/body/div[1]/div/div[2]/div[2]/div/wujie-app//html/body/div/div/div/div[2]/div/div[1]/div[2]/div[2]/div/div/div/div[2]/div[1]/div[2]/div/button',
+                'button.weui-desktop-btn.weui-desktop-btn_primary:has-text("发表视频")'
+            ],
             "publish_button": ['button.weui-desktop-btn.weui-desktop-btn_primary:has-text("发表")', 'button.weui-desktop-btn:has-text("发表")'],
             "title_editor": ['input.weui-desktop-form__input[placeholder="概括视频主要内容，字数建议6-16个字符"]'],
             "textbox_selectors": [
