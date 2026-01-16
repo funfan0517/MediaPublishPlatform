@@ -67,10 +67,10 @@
         <el-table-column prop="platformName" label="平台" width="120">
           <template #default="scope">
             <el-tag
-              :type="getPlatformTagType(scope.row.platformName)"
+              :type="getPlatformTagType(getDisplayPlatformName(scope.row.platformName))"
               effect="plain"
             >
-              {{ scope.row.platformName }}
+              {{ getDisplayPlatformName(scope.row.platformName) }}
             </el-tag>
           </template>
         </el-table-column>
@@ -137,6 +137,32 @@ import { reactive, ref, onMounted, computed } from 'vue'
 import { publishApi } from '@/api/publish'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { Search, Refresh } from '@element-plus/icons-vue'
+
+// 平台映射：平台类型 -> 平台名称
+const platformTypeMap = {
+  1: '小红书',
+  2: '视频号',
+  3: '抖音',
+  4: '快手',
+  5: 'TikTok',
+  6: 'Instagram',
+  7: 'Facebook',
+  8: '哔哩哔哩',
+  9: '百家号'
+}
+
+// 平台名称映射：平台key -> 平台名称
+const platformNameMap = {
+  'douyin': '抖音',
+  'kuaishou': '快手',
+  'xiaohongshu': '小红书',
+  'weixin': '视频号',
+  'tiktok': 'TikTok',
+  'instagram': 'Instagram',
+  'facebook': 'Facebook',
+  'bilibili': '哔哩哔哩',
+  'baijiahao': '百家号'
+}
 
 // 平台列表
 const platforms = [
@@ -239,21 +265,31 @@ async function fetchPublishTaskRecords() {
   }
 }
 
-// 根据平台获取标签类型
+// 根据平台获取标签类型，与账号管理页面保持一致
 const getPlatformTagType = (platform) => {
   const typeMap = {
-    '快手': 'success',
-    '抖音': 'danger',
-    '视频号': 'warning',
-    '小红书': 'info',
-    'TikTok': 'primary',
-    'Instagram': 'primary',
-    'Facebook': 'primary',
-    '哔哩哔哩': 'info',
-    '百家号': 'warning',
+    '快手': 'primary',
+    '抖音': 'primary',
+    '视频号': 'primary',
+    '小红书': 'primary',
+    'TikTok': 'danger',
+    'Instagram': 'danger',
+    'Facebook': 'danger',
+    '哔哩哔哩': 'primary',
+    '百家号': 'primary',
     '未知': 'default'
   }
   return typeMap[platform] || 'default'
+}
+
+// 获取显示的平台名称
+const getDisplayPlatformName = (platformName) => {
+  // 如果已经是中文名称，直接返回
+  if (['抖音', '快手', '小红书', '视频号', 'TikTok', 'Instagram', 'Facebook', '哔哩哔哩', '百家号'].includes(platformName)) {
+    return platformName
+  }
+  // 否则根据平台key获取中文名称
+  return platformNameMap[platformName] || platformName
 }
 
 // 根据发布状态获取标签类型
