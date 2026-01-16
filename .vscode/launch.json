@@ -8,7 +8,7 @@
             "name": "Python: sau_backend",
             "type": "python",
             "request": "launch",
-            "program": "${workspaceFolder}/sau_backend.py",
+            "program": "${workspaceFolder}\\sau_backend\\sau_backend.py",
             "console": "integratedTerminal",
             "justMyCode": true,
             //"pythonPath": "D:\\Programs\\Python\\Python311\\python.exe",
