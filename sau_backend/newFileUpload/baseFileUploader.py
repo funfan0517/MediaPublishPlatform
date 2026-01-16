@@ -259,14 +259,16 @@ class BaseFileUploader(object):
             
             # step11.点击发布
             await self.click_publish(page)
-            self.logger.info(f"step11：{self.platform_name}视频已点击发布按钮")   
+            self.logger.info(f"step11：{self.platform_name}视频已点击发布按钮")
 
             # step12.重新保存最新cookie
-            await context.storage_state(path=f"{self.account_file}")  
+            await context.storage_state(path=f"{self.account_file}")
             self.logger.info(f"step12：{self.platform_name}cookie已更新")
 
+            # 等待视频发布状态更新，方便看发布状态
             await asyncio.sleep(self.check_interval)  # close delay for look the video status
-            
+            await asyncio.sleep(5)
+
             # step13.关闭所有页面和浏览器上下文
             await context.close()
             await browser.close()
