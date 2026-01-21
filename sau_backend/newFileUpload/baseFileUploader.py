@@ -371,13 +371,6 @@ class BaseFileUploader(object):
             # 使用find_button方法查找上传按钮，支持中文和英文界面
             await asyncio.sleep(self.check_interval)
             await asyncio.sleep(5)
-            #如果是YouTube平台需要先点按钮进入到上传页面
-            if self.platform_name == "youtube":
-                upload_button0 = await self.find_button(self.upload_button_selectors)
-                if upload_button0:
-                    await upload_button0.click()
-                    self.logger.info("  [-] 将点击上传视频按钮")
-                    await asyncio.sleep(self.check_interval)
             upload_button = await self.find_button(self.upload_button_selectors)
             if not upload_button:
                 raise Exception("未找到上传图文/视频按钮")
@@ -491,15 +484,6 @@ class BaseFileUploader(object):
                 # 输入正文
                 await page.keyboard.insert_text(self.text)
                 await page.wait_for_timeout(self.wait_timeout_500ms)  # 等待500毫秒
-                ##如果是YouTube平台需要选择kids按钮
-                if self.platform_name == "youtube":
-                    kids_button = await self.find_button(
-                #'<div id="onRadio" class="style-scope tp-yt-paper-radio-button"></div>',
-                'xpath=/html/body/ytcp-uploads-dialog/tp-yt-paper-dialog/div/ytcp-animatable[1]/ytcp-ve/ytcp-video-metadata-editor/div/ytcp-video-metadata-editor-basics/div[5]/ytkc-made-for-kids-select/div[4]/tp-yt-paper-radio-group/tp-yt-paper-radio-button[1]/div[1]/div[2]')
-                    if kids_button:
-                        self.logger.info(f"  [-] 将点击kids按钮: {await kids_button.text_content()}")
-                        await kids_button.click()
-                        await page.wait_for_timeout(self.wait_timeout_500ms)  # 等待500毫秒
             
             # 输入标签（跟在正文后面）
             if self.tags_supported and self.tags:
@@ -590,21 +574,6 @@ class BaseFileUploader(object):
         """
         max_attempts = self.max_publish_attempts  # 最大尝试次数
         attempt = 0
-
-        #如果是YouTube平台需要点三次下一步按钮，再点一次可见范围按钮
-        if self.platform_name == "youtube":
-            for _ in range(3):
-                next_button = await self.find_button(self.publish_button_selectors)
-                if next_button:
-                    await next_button.click()
-                    await asyncio.sleep(self.check_interval)
-            # 点击可见范围按钮
-            visible_button = await self.find_button(
-                #'<div id="onRadio" class="style-scope tp-yt-paper-radio-button"></div>',
-                'xpath=/html/body/ytcp-uploads-dialog/tp-yt-paper-dialog/div/ytcp-animatable[1]/ytcp-ve/ytcp-video-metadata-editor/div/ytcp-video-metadata-editor-basics/div[5]/ytkc-made-for-kids-select/div[4]/tp-yt-paper-radio-group/tp-yt-paper-radio-button[1]/div[1]/div[2]',)
-            if visible_button:
-                await visible_button.click()
-                await asyncio.sleep(self.check_interval)
         
         # 上传按钮选择器列表
         while attempt < max_attempts and not self.publish_status:

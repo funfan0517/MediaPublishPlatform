@@ -15,8 +15,7 @@ export const useAccountStore = defineStore('account', () => {
     6: 'Instagram',
     7: 'Facebook',
     8: '哔哩哔哩',
-    9: '百家号',
-    10: 'YouTube'
+    9: '百家号'
   }
   
   // 设置账号列表

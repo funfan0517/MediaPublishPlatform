@@ -394,7 +394,6 @@ sau/
 | Facebook | 7 | facebook | ✅ | ❌ |
 | B站 | 8 | bilibili | ✅ | ✅ |
 | 百家号 | 9 | baijiahao | ✅ | ✅ |
-| YouTube | 10 | youtube | ✅ | ❌ |
 
 ## 快速开始使用
 

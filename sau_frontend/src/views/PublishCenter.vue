@@ -545,8 +545,7 @@ const platforms = [
   { key: 6, name: 'Instagram' },
   { key: 7, name: 'Facebook' },
   { key: 8, name: '哔哩哔哩' },
-  { key: 9, name: '百家号' },
-  { key: 10, name: 'YouTube' }
+  { key: 9, name: '百家号' }
 ]
 
 const defaultTabInit = {
@@ -840,8 +839,7 @@ const platformTypeMap = {
   6: 'instagram',
   7: 'facebook',
   8: 'bilibili',
-  9: 'baijiahao',
-  10: 'youtube'
+  9: 'baijiahao'
 }
 
 // 确认发布

@@ -174,8 +174,7 @@ const platforms = [
   { label: 'Instagram', value: 6 },
   { label: 'Facebook', value: 7 },
   { label: '哔哩哔哩', value: 8 },
-  { label: '百家号', value: 9 },
-  { label: 'YouTube', value: 10 }
+  { label: '百家号', value: 9 }
 ]
 
 // 状态列表
@@ -278,7 +277,6 @@ const getPlatformTagType = (platform) => {
     'Facebook': 'danger',
     '哔哩哔哩': 'primary',
     '百家号': 'primary',
-    'YouTube': 'danger',
     '未知': 'default'
   }
   return typeMap[platform] || 'default'
@@ -287,7 +285,7 @@ const getPlatformTagType = (platform) => {
 // 获取显示的平台名称
 const getDisplayPlatformName = (platformName) => {
   // 如果已经是中文名称，直接返回
-  if (['抖音', '快手', '小红书', '视频号', 'TikTok', 'Instagram', 'Facebook', '哔哩哔哩', '百家号', 'YouTube'].includes(platformName)) {
+  if (['抖音', '快手', '小红书', '视频号', 'TikTok', 'Instagram', 'Facebook', '哔哩哔哩', '百家号'].includes(platformName)) {
     return platformName
   }
   // 否则根据平台key获取中文名称

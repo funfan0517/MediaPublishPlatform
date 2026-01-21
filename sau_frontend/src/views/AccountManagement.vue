@@ -738,79 +738,6 @@
             </div>
           </div>
         </el-tab-pane>
-        
-        <el-tab-pane label="YouTube" name="youtube">
-          <div class="account-list-container">
-            <div class="account-search">
-              <el-input
-                v-model="searchKeyword"
-                placeholder="输入名称或账号搜索"
-                prefix-icon="Search"
-                clearable
-                @clear="handleSearch"
-                @input="handleSearch"
-              />
-              <div class="action-buttons">
-                <el-button type="primary" @click="handleAddAccount">添加账号</el-button>
-                <el-button type="primary" @click="fetchAccounts" :loading="false">
-                  <el-icon :class="{ 'is-loading': appStore.isAccountRefreshing }" v-if="appStore.isAccountRefreshing"><Loading /></el-icon>
-                  <el-icon v-else><Refresh /></el-icon>
-                  <span>{{ appStore.isAccountRefreshing ? '刷新中' : '刷新账号状态' }}</span>
-                </el-button>
-              </div>
-            </div>
-            
-            <div v-if="filteredYoutubeAccounts.length > 0" class="account-list">
-              <el-table :data="filteredYoutubeAccounts" style="width: 100%">
-                <el-table-column label="头像" width="80">
-                  <template #default="scope">
-                    <el-avatar :src="getDefaultAvatar(scope.row.name, scope.row.platform)" :size="40" />
-                  </template>
-                </el-table-column>
-                <el-table-column prop="name" label="名称" width="180" />
-                <el-table-column prop="platform" label="平台">
-                  <template #default="scope">
-                    <el-tag
-                      :type="getPlatformTagType(scope.row.platform)"
-                      effect="plain"
-                    >
-                      {{ scope.row.platform }}
-                    </el-tag>
-                  </template>
-                </el-table-column>
-                <el-table-column prop="status" label="状态">
-                  <template #default="scope">
-                    <el-tag
-                      :type="getStatusTagType(scope.row.status)"
-                      effect="plain"
-                      :class="{'clickable-status': isStatusClickable(scope.row.status)}"
-                      @click="handleStatusClick(scope.row)"
-                    >
-                      <el-icon :class="scope.row.status === '验证中' ? 'is-loading' : ''" v-if="scope.row.status === '验证中'">
-                        <Loading />
-                      </el-icon>
-                      {{ scope.row.status }}
-                    </el-tag>
-                  </template>
-                </el-table-column>
-                <el-table-column label="操作">
-                  <template #default="scope">
-                    <div class="action-buttons">
-                      <el-button size="small" @click="handleEdit(scope.row)">编辑</el-button>
-                      <el-button size="small" type="primary" :icon="Download" @click="handleDownloadCookie(scope.row)">下载Cookie</el-button>
-                      <el-button size="small" type="info" :icon="Upload" @click="handleUploadCookie(scope.row)">上传Cookie</el-button>
-                      <el-button size="small" type="danger" @click="handleDelete(scope.row)">删除</el-button>
-                    </div>
-                  </template>
-                </el-table-column>
-              </el-table>
-            </div>
-            
-            <div v-else class="empty-data">
-              <el-empty description="暂无YouTube账号数据" />
-            </div>
-          </div>
-        </el-tab-pane>
       </el-tabs>
     </div>
     
@@ -840,7 +767,6 @@
               <el-option label="Facebook" value="Facebook" />
               <el-option label="哔哩哔哩" value="哔哩哔哩" />
               <el-option label="百家号" value="百家号" />
-              <el-option label="YouTube" value="YouTube" />
             </el-select>
         </el-form-item>
         <el-form-item label="名称" prop="name">
@@ -978,8 +904,7 @@ const getPlatformTagType = (platform) => {
     'Instagram': 'danger',
     'Facebook': 'success',
     '哔哩哔哩': 'info',
-    '百家号': 'warning',
-    'YouTube': 'primary'
+    '百家号': 'warning'
   }
   return typeMap[platform] || 'info'
 }
@@ -1051,10 +976,6 @@ const filteredBilibiliAccounts = computed(() => {
 
 const filteredBaijiahaoAccounts = computed(() => {
   return filteredAccounts.value.filter(account => account.platform === '百家号')
-})
-
-const filteredYoutubeAccounts = computed(() => {
-  return filteredAccounts.value.filter(account => account.platform === 'YouTube')
 })
 
 // 搜索处理
@@ -1304,9 +1225,7 @@ const getDefaultAvatar = (name, platform) => {
     '哔哩哔哩': bilibiliIcon,
     'Baijiahao': baijiahaoIcon,
     'baijiahao': baijiahaoIcon,
-    '百家号': baijiahaoIcon,
-    'YouTube': facebookIcon,
-    'youtube': facebookIcon
+    '百家号': baijiahaoIcon
   };
   
   console.log('当前平台:', platform, '类型:', typeof platform);
@@ -1367,9 +1286,7 @@ const connectSSE = (platform, name) => {
     'Bilibili': '8',
     '哔哩哔哩': '8',
     'Baijiahao': '9',
-    '百家号': '9',
-    'YouTube': '10',
-    'youtube': '10'
+    '百家号': '9'
   }
 
   const type = platformTypeMap[platform] || '1'
@@ -1485,10 +1402,7 @@ const submitAccountForm = () => {
             'Instagram': 6,
             'Facebook': 7,
             'Bilibili': 8,
-            '哔哩哔哩': 8,
-            'Baijiahao': 9,
-            '百家号': 9,
-            'YouTube': 10
+            'Baijiahao': 9
           };
           const type = platformTypeMap[accountForm.platform] || 1;
 
